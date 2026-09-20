@@ -1,13 +1,17 @@
-﻿# uni-app-template
+# uni-app-template
 
-uni-app（Vue 3 + Vite + TypeScript）**多端小程序**工程模板，供团队多人协作开发。
+uni-app（Vue 3 + Vite + TypeScript）**多端小程序前端工程**，供团队多人协作开发。
 
 一套代码同时编译到 **微信小程序 / 支付宝小程序 / 抖音小程序**，H5 仅用于本地快速调试。
+
+> ⚠️ **本仓库只有前端。** 后端是独立的一个仓库/服务，通过 HTTP 接口对接。
+> 接口约定见下方「[与后端对接](#与后端对接)」一节。
 
 - 分层结构、状态管理、请求封装、多环境、代码规范、单元测试已全部就位
 - 组件库接入 [wot-design-uni](https://wot-design-uni.netlify.app/)，easycom 自动引入
 - 主包 / 分包已分离，微信分包优化已开启
-- Git 提交规范由 husky 强制，协作流程见 [CONTRIBUTING.md](./CONTRIBUTING.md)
+- Git 提交规范由 husky 强制，CI 自动检查
+- 协作流程见 [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ---
 
@@ -42,7 +46,8 @@ uni-app（Vue 3 + Vite + TypeScript）**多端小程序**工程模板，供团�
 
 ```
 .
-├─ .github/                # PR / Issue 模板
+├─ .github/                # PR / Issue 模板、CI 配置
+│  └─ workflows/ci.yml
 ├─ src
 │  ├─ api/                 # 接口层
 │  │  ├─ modules/          # 按业务模块拆分（user.ts / home.ts）
@@ -78,21 +83,72 @@ uni-app（Vue 3 + Vite + TypeScript）**多端小程序**工程模板，供团�
 
 ```bash
 npm install                 # 需要 Node >= 20.19，团队统一 Node 24
-
-git switch -c feat/your-task
-npm run dev:mp-weixin       # 产物在 dist/dev/mp-weixin
+npm run dev:mp-weixin       # 这个命令要一直开着，它负责实时编译
 ```
 
 然后用**微信开发者工具**导入 `dist/dev/mp-weixin` 目录即可预览。
 
-### 小程序端首次配置
+> ⚠️ 导入的是 `dist/dev/mp-weixin`，**不是项目根目录**。
+> 根目录没有 `app.json`，导错了开发者工具会报「在项目根目录未找到 app.json」。
 
-1. **appid**：把小程序的 appid 填进 `src/manifest.json` 的 `mp-weixin.appid`。
-   这是团队共用的，**要提交**。如果你个人想临时用测试号调试，改完记得执行
-   `git update-index --skip-worktree src/manifest.json`，避免把自己的 appid 误提交。
-2. **合法域名**：开发者工具里建议勾选「不校验合法域名」，否则本地联调会被拦。
-   正式发版前必须在小程序后台配置 request 合法域名。
-3. 支付宝 / 抖音端同理，配置分别在 `mp-alipay`、`mp-toutiao` 节点下。
+### 小程序端 appid
+
+**不需要注册小程序，用微信的测试号就行**（1 分钟）：
+
+1. 打开 https://mp.weixin.qq.com/wxamp/sandbox?doc=1 ，微信扫码，立刻拿到一个测试号
+2. 把自己的 appid 填进 `src/manifest.json` 的 `mp-weixin.appid`
+3. 填完**立刻**执行这条，让 git 忽略你这一处改动：
+
+   ```bash
+   git update-index --skip-worktree src/manifest.json
+   ```
+
+**为什么必须做第 3 步**：测试号是**个人的**，每个人的 appid 都不一样，
+不忽略的话你一提交就会把别人的覆盖掉。
+
+**如果现阶段只写页面、不碰微信登录** —— 连测试号都不用申请，
+`manifest.json` 留空就是游客模式，模拟器里完全够用。
+
+支付宝 / 抖音端同理，配置分别在 `mp-alipay`、`mp-toutiao` 节点下。
+
+### 合法域名
+
+开发者工具里勾选「不校验合法域名」，否则本地联调会被拦。
+（详见 [CONTRIBUTING.md](./CONTRIBUTING.md) 第 5 节）
+
+## 与后端对接
+
+**本仓库是纯前端**，不含任何后端代码。后端由另一个仓库提供。
+
+前端和后端之间只有两个接触点：
+
+### 1. 接口地址
+
+写在 `.env` 里，业务代码不直接碰：
+
+| 文件               | 变量                | 说明             |
+| ------------------ | ------------------- | ---------------- |
+| `.env.development` | `VITE_PROXY_TARGET` | 本地开发代理目标 |
+| `.env.production`  | `VITE_API_BASE_URL` | 生产环境接口地址 |
+
+### 2. 响应格式（后端必须遵守）
+
+`src/utils/request.ts` 已经约定了响应结构，**后端必须按这个返回**，否则前端要改代码：
+
+```json
+{ "code": 0, "message": "成功", "data": {} }
+```
+
+- 成功时 `code === 0`（可在 `.env` 的 `VITE_API_SUCCESS_CODE` 改）
+- 失败时 `code` 非 0，`message` 会**直接 toast 给用户**，所以要写成人话
+- 登录失效码 `401`（`VITE_API_UNAUTHORIZED_CODE`），命中后前端自动清本地 token
+
+### 3. 接口写在哪
+
+统一写在 `src/api/modules/<模块>.ts`，**页面里不拼 URL**。
+新增模块时同步在 `src/api/types.ts` 补参数和响应的类型。
+
+**一人一个文件，互不冲突。**
 
 ## 常用命令
 
@@ -102,6 +158,7 @@ npm run build:h5 / build:mp-weixin / build:mp-alipay / build:mp-toutiao
 npm run build:mp-all      # 三端一起构建
 npm run type-check        # vue-tsc 类型检查
 npm run lint              # ESLint 检查并自动修复
+npm run lint:check        # ESLint 只检查不修复（CI 用的就是这个）
 npm run format            # Prettier 格式化
 npm run test              # 单元测试
 npm run test:coverage     # 带覆盖率
@@ -189,6 +246,7 @@ export const useUserStore = defineStore(
 ```
 
 对应文件是 `src/pages-sub/blank/blank.vue`，跳转路径为 `/pages-sub/blank/blank`。
+写新页面时复制它改就行。
 
 约定：分包可以引用主包的公共模块，**反过来不行**——
 所以 `utils` / `store` / `api` 这些公共层必须留在主包（它们本来就在 `src/` 下，天然满足）。
@@ -222,14 +280,27 @@ Vitest + Vue Test Utils + jsdom。测试不经过 uni-app 编译器：
 npm run test              # 36 个用例，约 1.5 秒
 ```
 
+## CI
+
+`.github/workflows/ci.yml`，每次 push 到 `main` 或开 PR 时自动跑：
+
+| Job                | 内容                                                       |
+| ------------------ | ---------------------------------------------------------- |
+| 规范 / 类型 / 测试 | ESLint → vue-tsc → 36 个单元测试                           |
+| 三端小程序构建     | 微信 / 支付宝 / 抖音编译 + 主包体积检查（超 2MB 直接失败） |
+
+跑在 GitHub 自己的服务器上，不经过本地网络（所以本地连不上 GitHub 也不影响它）。
+构建产物会作为 artifact 保留 7 天，测试同学不用本地跑构建就能下载。
+
+**查看结果**：仓库页面 → `Actions` 标签。
+
 ## 已知约束
 
 - `vite` 必须保持 `5.2.8`，升级前先确认 uni-app 放开了 peer 约束
 - `sass` 钉在 `~1.77.8`：vite 5.2.8 没有 `css.preprocessorOptions.scss.api` 选项，
   只能走 legacy JS API，而 Dart Sass 1.80+ 每次编译都会刷弃用告警
 - 使用 npm（未提供 pnpm / yarn 配置）
-- **尚未接入 CI**：目前没有任何自动化门禁，主干质量完全依赖 PR 时的人工自测。
-  若后续要补，只需加一个 GitHub Actions workflow 跑
-  `npm run lint:check && npm run type-check && npm run test`
+- **分支保护尚未开启**：`main` 目前谁都能直接 push。协作流程目前靠自觉遵守，
+  等团队跑顺了建议去 `Settings → Rules` 打开「Require a pull request」变成强制
 - 构建时会看到 `The CJS build of Vite's Node API is deprecated`，来自 vitest 加载配置的方式，
   给项目加 `"type": "module"` 可以消掉，但会影响 uni CLI，故保留

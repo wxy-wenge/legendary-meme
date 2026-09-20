@@ -2,6 +2,8 @@
 
 本文是团队在这个仓库里写代码的约定。**新人第一天请完整读一遍**，之后可以当速查表用。
 
+> 这个仓库只有**前端**。后端是独立的一个仓库/服务，见文末「[后端在哪](#附后端在哪)」。
+
 ---
 
 ## 0. 环境准备
@@ -20,10 +22,23 @@ node -v             # 应输出 v24.x
 
 ### 编辑器
 
-推荐 VS Code，仓库里已带 `.vscode/settings.json`（保存自动格式化）和 `.vscode/extensions.json`，
-打开项目时按提示装推荐插件即可：Volar、ESLint、Prettier、EditorConfig。
+**用哪个都行，任务不挑工具。** 但有两个实际差异要知道：
 
-用 HBuilderX 也可以，但**请把格式化交给 Prettier**，不要用编辑器自带格式化，否则一提交就是一整篇 diff。
+| 编辑器                  | 情况                                                                                                           |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| VS Code / Cursor / 其他 | 仓库带了 `.vscode/settings.json`（保存自动格式化 + ESLint 提示），打开即用                                     |
+| **HBuilderX**           | ⚠️ 默认**看不到 `.` 开头的文件**（`.env`、`.github`、`.husky` 都看不到），需要自己在设置里打开「显示隐藏文件」 |
+
+**不管用哪个编辑器，编译都必须走 npm 命令**：
+
+```bash
+npm run dev:mp-weixin
+```
+
+HBuilderX 的「运行 / 发行」菜单是给 HBuilderX 创建的项目用的，对 npm 项目不生效。
+HBuilderX 用户可以用它的内置终端执行上面这条命令，或者配到「工具 → 外部命令」里一键执行。
+
+> ⚠️ 请把格式化交给 Prettier，不要用编辑器自带格式化，否则一提交就是一整篇 diff。
 
 ### 安装依赖
 
@@ -35,8 +50,7 @@ npm install
 
 ### 连不上 GitHub
 
-如果 `git clone` / `git push` 走 HTTPS 一直超时，改用 **SSH over 443**：
-GitHub 的 `github.com:443` 在部分网络下不通，但 `ssh.github.com:443` 是通的。
+`git clone` / `git push` 超时是**常见现象**，不是你的问题。先用 **SSH over 443**：
 
 ```bash
 # ~/.ssh/config
@@ -47,23 +61,27 @@ Host github.com
 ```
 
 配好后 `ssh -T git@github.com` 应返回 `Hi <你的用户名>! You've successfully authenticated`。
-远程地址用 SSH 格式：`git@github.com:<组织>/<仓库>.git`。
+
+**另外：推送偶尔会失败**，报 `Connection timed out` 之类。
+提交已经存在本地了不会丢，**直接再敲一遍 `git push`**，通常两三次内就过。
 
 ---
 
 ## 1. 分支模型
 
-`main` 是**受保护分支**，永远可发布，只接受 PR，不接受直接 push。
+> **约定：`main` 永远保持可发布状态，只接受 PR，不要直接往上 push。**
 
-| 分支            | 用途                     | 从哪切 | 合到哪 |
-| --------------- | ------------------------ | ------ | ------ |
-| `main`          | 稳定主干                 | —      | —      |
-| `feat/<描述>`   | 新功能                   | `main` | `main` |
-| `fix/<描述>`    | 修 bug                   | `main` | `main` |
-| `hotfix/<描述>` | 线上紧急修复             | `main` | `main` |
-| `chore/<描述>`  | 依赖升级、配置调整、重构 | `main` | `main` |
+目前这条是**靠自觉遵守**的（仓库还没开强制分支保护）。等大家跑顺了，
+建议去仓库 `Settings → Rules` 打开「Require a pull request before merging」，把它变成系统强制。
 
-描述用 kebab-case，简短表意：`feat/user-login`、`fix/cart-total-error`。
+| 分支           | 用途               | 从哪切 | 合到哪 |
+| -------------- | ------------------ | ------ | ------ |
+| `main`         | 稳定主干           | —      | —      |
+| `feat/<描述>`  | 新功能             | `main` | `main` |
+| `fix/<描述>`   | 修 bug             | `main` | `main` |
+| `chore/<描述>` | 依赖升级、配置调整 | `main` | `main` |
+
+描述用短横线连接，简短表意，**可以用中文**：`feat/课程列表`、`fix/登录失效`。
 
 分支要短命。一个分支活过一周，就会开始和 `main` 打架。
 
@@ -71,26 +89,28 @@ Host github.com
 
 ```bash
 # 1. 从最新的 main 切分支
-git switch main && git pull
-git switch -c feat/user-login
+git switch main
+git pull
+git switch -c feat/课程列表
 
 # 2. 开发，随时小步提交
 git add -A
-git commit -m "feat: 增加手机号登录表单"
+git commit -m "feat: 课程列表页"
 
-# 3. 推送前必须本地自测（见下方「自测三件套」）
-npm run lint
+# 3. 推送前本地自测（见下方「自测三件套」）
+npm run lint:check
 npm run type-check
 npm run test
 
-# 4. 推送并开 PR
-git push -u origin feat/user-login
-# 然后在 GitHub 上开 PR，按模板填写
+# 4. 推送
+git push -u origin feat/课程列表
 ```
+
+**第 4 步执行完终端会打印一个网址**，打开它就是开 PR 的页面，按模板填写即可。
 
 ### 自测三件套
 
-**当前仓库没有 CI，所以这三条是唯一的质量闸门，PR 前必须自己跑。**
+**PR 之前必须自己跑一遍。**
 
 ```bash
 npm run lint:check      # 代码规范
@@ -98,15 +118,26 @@ npm run type-check      # 类型
 npm run test            # 单元测试
 ```
 
+CI 也会自动跑这三条，但等 CI 反馈要两分钟，本地只要十秒 —— **早发现早改，别浪费一轮 PR**。
+
 另外，**任何影响页面的改动都要在小程序开发者工具里跑一遍**，别只跑 H5。
-多端项目里 H5 能通过、小程序挂掉是常态。
+多端项目里 H5 能过、小程序挂掉是常态。
+
+### CI 会自动检查什么
+
+push 之后 GitHub Actions 会自动跑：规范检查 → 类型检查 → 单元测试 → 三端小程序构建。
+
+结果显示在 **PR 页面上**（底部一排绿勾/红叉），也可以在仓库的 **`Actions`** 标签里看完整日志。
+
+**CI 红了不要急着合并**，点进去看是哪个 job 挂的，修完再推一次。
 
 ### 合并
 
 - 至少 **1 人 Review** 通过
-- Review 意见全部处理完（改了或说明为什么不改）
+- Review 意见全部处理完（改了，或者说明为什么不改）
+- **CI 全绿**
 - 用 **Squash merge**，保持 `main` 的提交历史一条线一件事
-- 合并后删除远程分支
+- 合并后删掉远程分支
 
 ## 3. 提交信息规范
 
@@ -114,10 +145,6 @@ husky 已强制校验，格式不对直接提交失败。
 
 ```
 <type>(<可选 scope>): <描述>
-
-<可选正文，说明为什么这么改>
-
-<可选 footer，如关联 issue>
 ```
 
 允许的 type：
@@ -136,8 +163,8 @@ husky 已强制校验，格式不对直接提交失败。
 | `revert`   | 回滚                          |
 
 ```
-feat(user): 增加手机号验证码登录
-fix: 修复购物车总价在小数位上精度丢失
+feat: 新增课程列表页
+fix: 修复 token 过期未跳转
 docs: 补充分包约定说明
 ```
 
@@ -145,7 +172,7 @@ docs: 补充分包约定说明
 
 ## 4. 代码分层约束（硬性）
 
-这是本模板最重要的约定，**Review 时优先看这几条**：
+这是本仓库最重要的约定，**Review 时优先看这几条**：
 
 | 规则                                                             | 原因                                            |
 | ---------------------------------------------------------------- | ----------------------------------------------- |
@@ -156,23 +183,34 @@ docs: 补充分包约定说明
 | 可复用逻辑抽到 `src/composables`，不要复制粘贴                   | 复制三遍之后，改 bug 要改三处还容易漏           |
 | 业务页面放 `src/pages-sub/`，主包只放 tabBar 页                  | 微信主包 2MB 硬上限                             |
 
+**`src/utils/` 和 `src/config/` 属于公共地基，要改先在群里说一声**（一改全项目都受影响）。
+
 ## 5. 小程序开发注意事项
 
-### appid
+### appid：每个人用自己的测试号
 
-团队共用的小程序 appid 填在 `src/manifest.json`，**这个文件要提交**。
+**不需要注册小程序、不需要营业执照。** 微信提供了测试号，扫码就有：
 
-个人临时用自己的测试号调试时：
+1. 打开 https://mp.weixin.qq.com/wxamp/sandbox?doc=1 ，微信扫码，立刻拿到一个测试号
+2. 能真机预览、能调 `uni.login` 这类需要 appid 的接口
+3. 把自己的 appid 填进 `src/manifest.json` 的 `mp-weixin.appid`
+4. **填完立刻执行**：
+
+   ```bash
+   git update-index --skip-worktree src/manifest.json
+   ```
+
+**为什么第 4 步是必须的**：测试号是**跟个人微信绑定的**，每个人的 appid 都不一样。
+不做这一步，你一提交就会把别人的 appid 覆盖掉，所有人的开发者工具都得重配。
+
+想恢复跟踪（比如以后统一改用正式 appid）：
 
 ```bash
-# 改完 manifest.json 后执行，让 git 忽略你的本地改动
-git update-index --skip-worktree src/manifest.json
-
-# 想恢复跟踪
 git update-index --no-skip-worktree src/manifest.json
 ```
 
-**千万别把自己的 appid 提交上去**，会让所有人的开发者工具都打不开。
+**如果现阶段只写页面、不碰微信登录** —— 连测试号都不用申请，
+`manifest.json` 留空就是游客模式，模拟器里完全够用。
 
 ### 合法域名
 
@@ -181,7 +219,7 @@ git update-index --no-skip-worktree src/manifest.json
 
 ### 主包体积
 
-微信主包上限 **2MB**，超了直接无法上传。养成习惯：
+微信主包上限 **2MB**，超了直接无法上传，CI 里也有一条会拦。养成习惯：
 
 - 新业务页面一律进 `src/pages-sub/`
 - 图片放 CDN，不要往 `src/static` 里堆大图
@@ -216,22 +254,41 @@ const login = () => my.getAuthCode({ scopes: 'auth_base' })
 
 Review 时按这个顺序看，前三条是硬性的：
 
-- [ ] 有没有违反「代码分层约束」的六条
-- [ ] 有没有把个人 appid / 密钥 / 本机地址提交上来
+- [ ] **CI 是否全绿**（红了先看日志，别直接合）
+- [ ] 有没有违反「[代码分层约束](#4-代码分层约束硬性)」的六条
+- [ ] 有没有把**个人 appid** / 密钥 / 本机地址提交上来
 - [ ] 新页面有没有放进分包，有没有往主包塞大资源
 - [ ] 请求是否走了 `utils/request`，错误分支是否有处理
 - [ ] 有没有需要补的单测（纯函数、store、工具类必须有）
 - [ ] 条件编译的代码是否在对应平台验证过
-- [ ] 提交信息是否符合规范
 - [ ] 有没有留下 `console.log`、调试代码、注释掉的大段旧代码
 
 ## 8. 新人上手 Checklist
 
 - [ ] `nvm use 24`，`node -v` 确认是 v24.x
+- [ ] `git clone` 成功（连不上就看[第 0 节的 443 配置](#连不上-github)）
 - [ ] `npm install` 成功
 - [ ] `git config core.hooksPath` 输出 `.husky/_`
 - [ ] `npm run test` 全绿
-- [ ] `npm run dev:mp-weixin` 能起，开发者工具能导入 `dist/dev/mp-weixin`
-- [ ] `src/manifest.json` 里的 appid 是团队的，不是自己的
-- [ ] 读一遍本文件第 4 节「代码分层约束」
-- [ ] 找个人要一个「good first issue」，走完一次完整的 PR 流程
+- [ ] `npm run dev:mp-weixin` 能起，微信开发者工具能导入 `dist/dev/mp-weixin`
+- [ ] 申请测试号并填进 `src/manifest.json`，执行了 `skip-worktree`
+      （不碰微信登录的话可跳过）
+- [ ] 读一遍[第 4 节「代码分层约束」](#4-代码分层约束硬性)
+- [ ] 切一个 `feat/xxx` 分支，走完一次完整的 PR 流程
+
+---
+
+## 附：后端在哪
+
+**这个仓库只有前端**，不含任何后端代码。后端是独立的一个仓库/服务，通过 HTTP 接口对接。
+
+所以要分清你的任务：
+
+| 你要做的               | 去哪                                                                         |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| 写页面、调接口         | **本仓库**，接口调用写在 `src/api/modules/`                                  |
+| 写接口实现、建数据库   | **后端仓库**                                                                 |
+| 约定接口路径和返回格式 | 两边一起定，写进本仓库 README 的「[与后端对接](./README.md#与后端对接)」一节 |
+
+**最重要的一条**：后端的返回格式必须符合
+`{ code, message, data }` 这个约定（详见 README），否则前端要跟着改代码。
