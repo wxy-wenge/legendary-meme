@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 dist/
 unpackage/
 coverage/
@@ -21,7 +21,6 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# 微信开发者工具在导入目录时会生成，属于个人配置
-project.private.config.json
-
+# 微信开发者工具导入目录时会生成；uni-app 项目正确的那份由编译产出在 dist/ 里，根目录不该有
 project.config.json
+project.private.config.json

@@ -1,4 +1,4 @@
-# uni-app-template
+﻿# uni-app-template
 
 uni-app（Vue 3 + Vite + TypeScript）**多端小程序**工程模板，供团队多人协作开发。
 
@@ -54,7 +54,7 @@ uni-app（Vue 3 + Vite + TypeScript）**多端小程序**工程模板，供团�
 │  ├─ config/              # 统一读取 import.meta.env
 │  ├─ pages/               # 主包页面，与 pages.json 一一对应
 │  ├─ pages-sub/           # 分包页面（业务页面优先放这里）
-│  │  └─ demo/demo.vue
+│  │  └─ blank/blank.vue
 │  ├─ static/              # 静态资源
 │  ├─ store/               # Pinia
 │  │  ├─ modules/          # app / user
@@ -184,11 +184,11 @@ export const useUserStore = defineStore(
 ```jsonc
 // src/pages.json
 "subPackages": [
-  { "root": "pages-sub", "pages": [{ "path": "demo/demo" }] }
+  { "root": "pages-sub", "pages": [{ "path": "blank/blank" }] }
 ]
 ```
 
-对应文件是 `src/pages-sub/demo/demo.vue`，跳转路径为 `/pages-sub/demo/demo`。
+对应文件是 `src/pages-sub/blank/blank.vue`，跳转路径为 `/pages-sub/blank/blank`。
 
 约定：分包可以引用主包的公共模块，**反过来不行**——
 所以 `utils` / `store` / `api` 这些公共层必须留在主包（它们本来就在 `src/` 下，天然满足）。
