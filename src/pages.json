@@ -1,6 +1,9 @@
 {
   "easycom": {
-    "autoscan": true
+    "autoscan": true,
+    "custom": {
+      "^wd-(.*)": "wot-design-uni/components/wd-$1/wd-$1.vue"
+    }
   },
   "pages": [
     {
@@ -20,6 +23,19 @@
       "style": {
         "navigationBarTitleText": "我的"
       }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages-sub",
+      "pages": [
+        {
+          "path": "demo/demo",
+          "style": {
+            "navigationBarTitleText": "分包示例"
+          }
+        }
+      ]
     }
   ],
   "globalStyle": {

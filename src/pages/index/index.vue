@@ -49,6 +49,7 @@
     <view class="card">
       <text class="card__title">页面跳转</text>
       <button class="btn" size="mini" @click="goAbout">查看框架说明</button>
+      <button class="btn" size="mini" @click="goSubDemo">分包 + 组件库示例</button>
     </view>
   </view>
 </template>
@@ -80,5 +81,10 @@ async function load(): Promise<void> {
 
 function goAbout(): void {
   uni.navigateTo({ url: '/pages/about/about' })
+}
+
+/** 分包页面，用于验证 subPackages 与 wot-design-uni 组件确实能编译进小程序包 */
+function goSubDemo(): void {
+  uni.navigateTo({ url: '/pages-sub/demo/demo' })
 }
 </script>
