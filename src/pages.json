@@ -13,12 +13,6 @@
       }
     },
     {
-      "path": "pages/about/about",
-      "style": {
-        "navigationBarTitleText": "框架说明"
-      }
-    },
-    {
       "path": "pages/user/user",
       "style": {
         "navigationBarTitleText": "我的"
@@ -30,9 +24,9 @@
       "root": "pages-sub",
       "pages": [
         {
-          "path": "demo/demo",
+          "path": "blank/blank",
           "style": {
-            "navigationBarTitleText": "分包示例"
+            "navigationBarTitleText": "空白页"
           }
         }
       ]

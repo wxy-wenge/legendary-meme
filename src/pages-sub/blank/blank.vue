@@ -1,8 +1,8 @@
 <template>
   <view class="page">
     <view class="placeholder">
-      <text class="placeholder__title">我的</text>
-      <text class="placeholder__desc">这里还是空的，开始写你的内容吧</text>
+      <text class="placeholder__title">空白页</text>
+      <text class="placeholder__desc">业务页面放这里（src/pages-sub/），主包只留 tabBar 页</text>
     </view>
   </view>
 </template>
