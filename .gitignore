@@ -23,3 +23,5 @@ Thumbs.db
 
 # 微信开发者工具在导入目录时会生成，属于个人配置
 project.private.config.json
+
+project.config.json
