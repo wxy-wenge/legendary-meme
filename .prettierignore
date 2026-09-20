@@ -1,0 +1,8 @@
+node_modules
+dist
+unpackage
+coverage
+.npm-cache
+pnpm-lock.yaml
+package-lock.json
+*.log

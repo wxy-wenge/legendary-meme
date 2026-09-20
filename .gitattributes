@@ -1,0 +1,8 @@
+* text=auto eol=lf
+
+# husky 钩子是 shell 脚本，必须保持 LF，否则在 Windows 上 Git 无法执行
+.husky/* text eol=lf
+*.sh text eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf

@@ -1,0 +1,90 @@
+{
+  "name": "uni-app-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "uni-app (Vue 3 + Vite + TypeScript) 工程模板",
+  "scripts": {
+    "dev:h5": "uni",
+    "dev:app": "uni -p app",
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "dev:mp-alipay": "uni -p mp-alipay",
+    "dev:mp-baidu": "uni -p mp-baidu",
+    "dev:mp-toutiao": "uni -p mp-toutiao",
+    "dev:mp-qq": "uni -p mp-qq",
+    "build:h5": "uni build",
+    "build:app": "uni build -p app",
+    "build:mp-weixin": "uni build -p mp-weixin",
+    "build:mp-alipay": "uni build -p mp-alipay",
+    "build:mp-baidu": "uni build -p mp-baidu",
+    "build:mp-toutiao": "uni build -p mp-toutiao",
+    "build:mp-qq": "uni build -p mp-qq",
+    "type-check": "vue-tsc --noEmit",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "3.0.0-5020620260917001",
+    "@dcloudio/uni-app-harmony": "3.0.0-5020620260917001",
+    "@dcloudio/uni-app-plus": "3.0.0-5020620260917001",
+    "@dcloudio/uni-components": "3.0.0-5020620260917001",
+    "@dcloudio/uni-h5": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-alipay": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-baidu": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-jd": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-kuaishou": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-lark": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-qq": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-toutiao": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-weixin": "3.0.0-5020620260917001",
+    "@dcloudio/uni-mp-xhs": "3.0.0-5020620260917001",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@dcloudio/types": "3.4.31",
+    "@dcloudio/uni-automator": "3.0.0-5020620260917001",
+    "@dcloudio/uni-cli-shared": "3.0.0-5020620260917001",
+    "@dcloudio/uni-stacktracey": "3.0.0-5020620260917001",
+    "@dcloudio/vite-plugin-uni": "3.0.0-5020620260917001",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^24.13.6",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitest/coverage-v8": "^2.1.9",
+    "@vue/runtime-core": "^3.4.21",
+    "@vue/test-utils": "^2.5.1",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^9.33.0",
+    "husky": "^9.1.7",
+    "jsdom": "^25.0.1",
+    "lint-staged": "^17.5.1",
+    "prettier": "^3.9.8",
+    "sass": "~1.77.8",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.0",
+    "vite": "5.2.8",
+    "vitest": "^2.1.9",
+    "vue-tsc": "^2.2.12"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,scss,css,html}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
