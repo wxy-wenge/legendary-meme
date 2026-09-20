@@ -1,0 +1,104 @@
+# 每次 push 到 main、或有人开 PR 时，自动跑规范检查、类型检查、单元测试和三端构建。
+#
+# 这道门禁解决的是：把「机器能查的问题」挡在合并之前，
+# 让 Review 只需要判断逻辑和设计，而不是靠肉眼从 diff 里找类型错误。
+#
+# 说明：CI 跑在 GitHub 自己的服务器上，不经过本地网络，
+# 所以本地的代理 / HTTPS 拦截问题不会影响它。
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 同一分支连续提交时，取消还在排队的旧任务，避免浪费额度
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# CI 环境不需要安装 git 钩子
+env:
+  HUSKY: 0
+
+jobs:
+  checks:
+    name: 规范 / 类型 / 测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      # 用 ci 而不是 install：严格按 package-lock.json 安装，
+      # 锁文件和 package.json 不一致时会直接报错，避免「本地能跑 CI 装不上」
+      - name: 安装依赖
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint:check
+
+      - name: 类型检查
+        run: npm run type-check
+
+      - name: 单元测试
+        run: npm run test
+
+  build:
+    name: 三端小程序构建
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # 检查没过就不用浪费时间构建
+    needs: checks
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建微信小程序
+        run: npm run build:mp-weixin
+
+      - name: 构建支付宝小程序
+        run: npm run build:mp-alipay
+
+      - name: 构建抖音小程序
+        run: npm run build:mp-toutiao
+
+      # 微信主包上限 2MB，超了直接无法上传。
+      # 注意这里统计的是未压缩的磁盘体积，微信按压缩后计算，所以该数字比真实值偏大，
+      # 作为预警阈值使用：真被这条拦下来时，先用开发者工具确认一下实际体积。
+      - name: 检查微信主包体积
+        run: |
+          MAIN_BYTES=$(find dist/build/mp-weixin -type f -not -path '*/pages-sub/*' -printf '%s\n' | awk '{s+=$1} END {print s+0}')
+          MAIN_KB=$((MAIN_BYTES / 1024))
+          LIMIT_KB=2048
+          echo "微信主包体积（未压缩）：${MAIN_KB} KB / ${LIMIT_KB} KB"
+          if [ "$MAIN_KB" -gt "$LIMIT_KB" ]; then
+            echo "::error::主包超过 2MB 上限，请把业务页面移入 src/pages-sub/ 分包，或把大图片挪到 CDN。"
+            exit 1
+          fi
+
+      # 让测试同学不用在本地跑构建就能拿到包
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: mp-builds
+          path: dist/build/mp-*
+          retention-days: 7
