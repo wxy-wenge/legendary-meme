@@ -1,13 +1,13 @@
-import { get, post, put } from '@/utils/request'
-import type { LoginParams, LoginResult, UserInfo } from '../types'
+import { get, post } from '@/utils/request'
+import type { CaptchaResult, LoginParams, LoginResult, UserInfoResult } from '../types'
 
 export const userApi = {
-  /** 登录接口不需要带旧 token */
-  login: (data: LoginParams) => post<LoginResult>('/auth/login', data, { auth: false }),
+  /** 获取登录验证码（匿名） */
+  getCaptcha: () => get<CaptchaResult>('/captchaImage', undefined, { auth: false }),
 
-  logout: () => post<null>('/auth/logout'),
+  /** 登录（匿名，token 在返回顶层） */
+  login: (data: LoginParams) => post<LoginResult>('/login', data, { auth: false }),
 
-  getProfile: () => get<UserInfo>('/user/profile'),
-
-  updateProfile: (data: Partial<UserInfo>) => put<UserInfo>('/user/profile', data)
+  /** 获取当前登录用户信息 / 角色 / 权限 */
+  getInfo: () => get<UserInfoResult>('/getInfo')
 }

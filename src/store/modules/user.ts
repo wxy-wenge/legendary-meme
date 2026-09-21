@@ -10,42 +10,50 @@ export const useUserStore = defineStore(
   () => {
     const token = ref(getToken())
     const userInfo = ref<UserInfo | null>(null)
+    const roles = ref<string[]>([])
+    const permissions = ref<string[]>([])
 
     const isLogged = computed(() => token.value.length > 0)
-    const nickname = computed(() => userInfo.value?.nickname || '未登录')
+    const nickname = computed(() => userInfo.value?.nickName || '未登录')
 
     /** 直接写入会话，用于登录成功后或测试 / 演示场景 */
-    function setSession(nextToken: string, info?: UserInfo | null): void {
+    function setSession(nextToken: string): void {
       token.value = nextToken
       setToken(nextToken)
-      if (info !== undefined) userInfo.value = info
     }
 
     function setUserInfo(info: UserInfo | null): void {
       userInfo.value = info
     }
 
+    /** 登录：换取 token 后拉取用户信息 / 角色 / 权限 */
     async function login(params: LoginParams): Promise<UserInfo> {
-      const result = await userApi.login(params)
-      setSession(result.token, result.userInfo)
-      return result.userInfo
+      const { token: nextToken } = await userApi.login(params)
+      setSession(nextToken)
+      return fetchProfile()
     }
 
     async function fetchProfile(): Promise<UserInfo> {
-      const info = await userApi.getProfile()
-      userInfo.value = info
-      return info
+      const info = await userApi.getInfo()
+      userInfo.value = info.user
+      roles.value = info.roles ?? []
+      permissions.value = info.permissions ?? []
+      return info.user
     }
 
     function logout(): void {
       token.value = ''
       userInfo.value = null
+      roles.value = []
+      permissions.value = []
       clearToken()
     }
 
     return {
       token,
       userInfo,
+      roles,
+      permissions,
       isLogged,
       nickname,
       setSession,
@@ -59,6 +67,7 @@ export const useUserStore = defineStore(
     persist: {
       key: 'user',
       storage: uniStorage,
+      // roles/permissions 每次登录后重新拉取，不落盘
       pick: ['token', 'userInfo']
     }
   }

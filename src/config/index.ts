@@ -12,8 +12,8 @@ export const IS_DEV = Boolean(env.DEV)
 /** 接口基础路径 */
 export const API_BASE_URL = env.VITE_API_BASE_URL || '/api'
 
-/** 业务成功码（与后端约定，通常为 0 或 200） */
-export const API_SUCCESS_CODE = Number(env.VITE_API_SUCCESS_CODE ?? 0)
+/** 业务成功码（与若依后端约定，200 表示成功） */
+export const API_SUCCESS_CODE = Number(env.VITE_API_SUCCESS_CODE ?? 200)
 
 /** 登录失效码，命中后清除本地 token */
 export const API_UNAUTHORIZED_CODE = Number(env.VITE_API_UNAUTHORIZED_CODE ?? 401)

@@ -5,11 +5,10 @@ import { getToken, setToken } from '@/utils/auth'
 import type { UserInfo } from '@/api/types'
 
 const demoUser: UserInfo = {
-  id: 1,
-  username: 'demo',
-  nickname: '演示用户',
-  avatar: '',
-  roles: ['user']
+  userId: 1,
+  userName: 'demo',
+  nickName: '演示用户',
+  avatar: ''
 }
 
 describe('useUserStore', () => {
@@ -27,7 +26,8 @@ describe('useUserStore', () => {
   it('setSession 同时写入内存与本地存储', () => {
     const store = useUserStore()
 
-    store.setSession('t-1', demoUser)
+    store.setSession('t-1')
+    store.setUserInfo(demoUser)
 
     expect(store.isLogged).toBe(true)
     expect(store.nickname).toBe('演示用户')
@@ -36,7 +36,8 @@ describe('useUserStore', () => {
 
   it('logout 清空内存与本地 token', () => {
     const store = useUserStore()
-    store.setSession('t-1', demoUser)
+    store.setSession('t-1')
+    store.setUserInfo(demoUser)
 
     store.logout()
 

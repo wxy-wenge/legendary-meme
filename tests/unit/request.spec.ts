@@ -36,12 +36,12 @@ describe('request 业务码处理', () => {
   })
 
   it('命中成功码时直接返回 data', async () => {
-    respond(200, { code: 0, message: 'ok', data: { id: 1 } })
+    respond(200, { code: 200, msg: 'ok', data: { id: 1 } })
     await expect(get<{ id: number }>('/user/profile')).resolves.toEqual({ id: 1 })
   })
 
   it('业务码异常时抛出带 code 的 RequestError', async () => {
-    respond(200, { code: 500, message: '服务异常', data: null })
+    respond(200, { code: 500, msg: '服务异常', data: null })
     await expect(get('/x', undefined, { toast: false })).rejects.toMatchObject({
       name: 'RequestError',
       code: 500,
@@ -56,14 +56,14 @@ describe('request 业务码处理', () => {
 
   it('登录失效码顺带清掉本地 token', async () => {
     setToken('stale-token')
-    respond(200, { code: 401, message: '未登录', data: null })
+    respond(200, { code: 401, msg: '未登录', data: null })
 
     await expect(get('/x', undefined, { toast: false })).rejects.toBeInstanceOf(RequestError)
     expect(getToken()).toBe('')
   })
 
   it('toast 开关生效', async () => {
-    respond(200, { code: 500, message: '服务异常', data: null })
+    respond(200, { code: 500, msg: '服务异常', data: null })
     await expect(get('/x', undefined, { toast: false })).rejects.toBeInstanceOf(RequestError)
     expect(uniMock.showToast).not.toHaveBeenCalled()
 
@@ -94,7 +94,7 @@ describe('request 请求头', () => {
 
   it('默认注入 Authorization', async () => {
     setToken('token-123')
-    respond(200, { code: 0, message: 'ok', data: null })
+    respond(200, { code: 200, msg: 'ok', data: null })
 
     await get('/x')
 
@@ -105,7 +105,7 @@ describe('request 请求头', () => {
 
   it('auth: false 时不注入（登录接口）', async () => {
     setToken('token-123')
-    respond(200, { code: 0, message: 'ok', data: null })
+    respond(200, { code: 200, msg: 'ok', data: null })
 
     await post('/auth/login', { username: 'demo' }, { auth: false })
 
@@ -120,7 +120,7 @@ describe('request loading 计数', () => {
     const resolvers: Array<() => void> = []
     uniMock.request.mockImplementation((options: UniRequestOptions) => {
       resolvers.push(() =>
-        options.success?.({ statusCode: 200, data: { code: 0, message: 'ok', data: null } })
+        options.success?.({ statusCode: 200, data: { code: 200, msg: 'ok', data: null } })
       )
       return { abort: vi.fn() }
     })

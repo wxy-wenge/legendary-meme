@@ -3,8 +3,12 @@ import { clearToken, getToken } from './auth'
 
 export interface ApiResponse<T = unknown> {
   code: number
-  message: string
-  data: T
+  msg: string
+  data?: T
+  rows?: T[]
+  total?: number
+  token?: string
+  [key: string]: unknown
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -132,10 +136,15 @@ export async function request<T = unknown>(config: RequestConfig): Promise<T> {
 
     const result = body as ApiResponse<T>
 
-    if (result.code === API_SUCCESS_CODE) return result.data
+    if (result.code === API_SUCCESS_CODE) {
+      // 若依返回约定：单个对象放 data；列表的 rows/total、登录的 token、
+      // getInfo 的 user/roles/permissions 都直接放顶层（没有 data 字段）。
+      // 有 data 就取 data，否则返回整个响应体，由各 api 模块按需取值。
+      return ('data' in result ? result.data : result) as T
+    }
     if (result.code === API_UNAUTHORIZED_CODE) handleUnauthorized()
 
-    throw new RequestError(result.message || '请求失败', result.code, result.data)
+    throw new RequestError(result.msg || '请求失败', result.code, result.data)
   } catch (err) {
     const error = normalizeError(err)
     if (toast) uni.showToast({ title: error.message, icon: 'none' })
