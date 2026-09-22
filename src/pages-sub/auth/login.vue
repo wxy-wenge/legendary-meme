@@ -13,7 +13,7 @@
           class="field__input"
           placeholder="请输入账号"
           placeholder-class="field__ph"
-          :maxlength="30"
+          :maxlength="20"
         />
       </view>
 
@@ -25,7 +25,7 @@
           password
           placeholder="请输入密码"
           placeholder-class="field__ph"
-          :maxlength="30"
+          :maxlength="20"
         />
       </view>
 
@@ -35,13 +35,13 @@
           <input
             v-model="form.code"
             class="field__input field__input--code"
-            placeholder="请输入验证码"
+            placeholder="请输入计算结果"
             placeholder-class="field__ph"
-            :maxlength="6"
+            :maxlength="4"
           />
           <view class="captcha" @click="loadCaptcha">
             <image v-if="captcha.img" class="captcha__img" :src="captcha.img" mode="aspectFit" />
-            <text v-else class="captcha__text">{{ captcha.mockCode || '----' }}</text>
+            <text v-else class="captcha__text">{{ captcha.mockText || '----' }}</text>
           </view>
         </view>
       </view>
@@ -75,7 +75,7 @@ const form = reactive({
 const captcha = reactive({
   uuid: '',
   img: '',
-  mockCode: ''
+  mockText: ''
 })
 
 /** 后端可能关闭验证码（captchaEnabled=false），此时隐藏输入框 */
@@ -88,7 +88,7 @@ async function loadCaptcha(): Promise<void> {
     captchaOn.value = res.captchaEnabled !== false
     captcha.uuid = res.uuid ?? ''
     captcha.img = res.img ?? ''
-    captcha.mockCode = res.mockCode ?? ''
+    captcha.mockText = res.mockText ?? ''
     if (!captchaOn.value) form.code = ''
   } catch {
     // 取验证码失败不阻塞登录，用户可点图片重试
@@ -219,7 +219,7 @@ function goRegister(): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 200rpx;
+  width: 220rpx;
   height: 88rpx;
   margin-left: 20rpx;
   background-color: #eef2fb;
@@ -232,10 +232,11 @@ function goRegister(): void {
   }
 
   &__text {
-    font-size: 36rpx;
+    font-size: 32rpx;
     font-weight: 600;
-    letter-spacing: 8rpx;
+    letter-spacing: 2rpx;
     color: #3b6fd4;
+    white-space: nowrap;
   }
 }
 

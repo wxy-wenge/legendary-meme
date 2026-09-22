@@ -11,9 +11,9 @@
         <input
           v-model="form.username"
           class="field__input"
-          placeholder="请输入账号"
+          placeholder="2-20 个字符"
           placeholder-class="field__ph"
-          :maxlength="30"
+          :maxlength="20"
         />
       </view>
 
@@ -23,9 +23,9 @@
           v-model="form.password"
           class="field__input"
           password
-          placeholder="请输入密码（5-20 位）"
+          placeholder="5-20 个字符"
           placeholder-class="field__ph"
-          :maxlength="30"
+          :maxlength="20"
         />
       </view>
 
@@ -37,7 +37,7 @@
           password
           placeholder="请再次输入密码"
           placeholder-class="field__ph"
-          :maxlength="30"
+          :maxlength="20"
         />
       </view>
 
@@ -47,13 +47,13 @@
           <input
             v-model="form.code"
             class="field__input field__input--code"
-            placeholder="请输入验证码"
+            placeholder="请输入计算结果"
             placeholder-class="field__ph"
-            :maxlength="6"
+            :maxlength="4"
           />
           <view class="captcha" @click="loadCaptcha">
             <image v-if="captcha.img" class="captcha__img" :src="captcha.img" mode="aspectFit" />
-            <text v-else class="captcha__text">{{ captcha.mockCode || '----' }}</text>
+            <text v-else class="captcha__text">{{ captcha.mockText || '----' }}</text>
           </view>
         </view>
       </view>
@@ -76,6 +76,12 @@ import { onLoad } from '@dcloudio/uni-app'
 import { userApi } from '@/api/modules/user'
 import { useUserStore } from '@/store/modules/user'
 
+/** 与后端 UserConstants 保持一致 */
+const USERNAME_MIN = 2
+const USERNAME_MAX = 20
+const PASSWORD_MIN = 5
+const PASSWORD_MAX = 20
+
 const userStore = useUserStore()
 
 const form = reactive({
@@ -88,7 +94,7 @@ const form = reactive({
 const captcha = reactive({
   uuid: '',
   img: '',
-  mockCode: ''
+  mockText: ''
 })
 
 const captchaOn = ref(true)
@@ -100,7 +106,7 @@ async function loadCaptcha(): Promise<void> {
     captchaOn.value = res.captchaEnabled !== false
     captcha.uuid = res.uuid ?? ''
     captcha.img = res.img ?? ''
-    captcha.mockCode = res.mockCode ?? ''
+    captcha.mockText = res.mockText ?? ''
     if (!captchaOn.value) form.code = ''
   } catch {
     // 取验证码失败不阻塞注册，用户可点图片重试
@@ -112,9 +118,15 @@ onLoad(() => {
 })
 
 function validate(): string {
-  if (!form.username.trim()) return '请输入账号'
+  const username = form.username.trim()
+  if (!username) return '请输入账号'
+  if (username.length < USERNAME_MIN || username.length > USERNAME_MAX) {
+    return `账户长度必须在${USERNAME_MIN}到${USERNAME_MAX}个字符之间`
+  }
   if (!form.password) return '请输入密码'
-  if (form.password.length < 5) return '密码至少 5 位'
+  if (form.password.length < PASSWORD_MIN || form.password.length > PASSWORD_MAX) {
+    return `密码长度必须在${PASSWORD_MIN}到${PASSWORD_MAX}个字符之间`
+  }
   if (form.password !== form.confirmPassword) return '两次输入的密码不一致'
   if (captchaOn.value && !form.code.trim()) return '请输入验证码'
   return ''
@@ -233,7 +245,7 @@ function goLogin(): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 200rpx;
+  width: 220rpx;
   height: 88rpx;
   margin-left: 20rpx;
   background-color: #eef2fb;
@@ -246,10 +258,11 @@ function goLogin(): void {
   }
 
   &__text {
-    font-size: 36rpx;
+    font-size: 32rpx;
     font-weight: 600;
-    letter-spacing: 8rpx;
+    letter-spacing: 2rpx;
     color: #3b6fd4;
+    white-space: nowrap;
   }
 }
 

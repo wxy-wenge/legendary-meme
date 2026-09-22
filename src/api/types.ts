@@ -12,23 +12,30 @@ export interface LoginParams {
   uuid?: string
 }
 
-/** 注册参数（若依 POST /register：比登录多一个确认密码） */
+/**
+ * 注册参数（若依 POST /register）。
+ * 后端 RegisterBody 只继承 LoginBody，没有 confirmPassword 字段，
+ * 所以 confirmPassword 仅用于前端校验，后端会忽略它。
+ */
 export interface RegisterParams extends LoginParams {
   confirmPassword: string
 }
 
 /** 验证码返回（GET /captchaImage） */
 export interface CaptchaResult {
-  /** 是否开启验证码；false 时前端可隐藏验证码输入框 */
+  /** 是否开启验证码；false 时前端隐藏验证码输入框 */
   captchaEnabled: boolean
   uuid?: string
-  /** base64 图片（data:image/...;base64,xxxx），开启验证码时用于 <image> 显示 */
+  /**
+   * 验证码图片。后端返回的是**裸 base64**（没有 data URI 前缀），
+   * 已在 src/api/modules/user.ts 里补成完整的 `data:image/jpeg;base64,xxx`。
+   */
   img?: string
   /**
-   * 仅前端模拟层返回（见 src/api/mock.ts）：验证码明文。
-   * 后端不会返回这个字段，接入真实接口后自动失效。
+   * 仅前端模拟层返回（见 src/api/mock.ts）：模拟模式下用于显示的验证码文本，
+   * 例如数学题 `3+5=?`。真实后端不会返回这个字段。
    */
-  mockCode?: string
+  mockText?: string
 }
 
 /** 登录返回（POST /login，token 在响应顶层，不在 data 里） */
@@ -67,12 +74,10 @@ export interface TableResult<T> {
 
 /**
  * 学习用户实体。
- * 字段需与后端 com.ruoyi.learninguser.entity 的实体类保持一致，按实际表结构补充。
+ * 字段需与后端实体类保持一致 —— 目前后端还没有对应模块，字段待定。
  */
 export interface LearningUser {
   id: number
-  // TODO: 按后端实体补充字段，例如：
-  // name: string
-  // createTime: string
+  // TODO: 后端建好实体后按实际字段补充
   [key: string]: unknown
 }
