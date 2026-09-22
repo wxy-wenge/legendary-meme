@@ -1,66 +1,79 @@
 <template>
-  <view class="page">
+  <view class="auth-page">
+    <view class="bg">
+      <view class="bg__blob bg__blob--a"></view>
+      <view class="bg__blob bg__blob--b"></view>
+      <view class="bg__blob bg__blob--c"></view>
+    </view>
+
     <view class="auth">
-      <view class="auth__head">
-        <text class="auth__title">创建账号</text>
-        <text class="auth__sub">注册后即可登录学习</text>
+      <view class="auth__brand">
+        <view class="auth__mark">
+          <text class="auth__glyph">学</text>
+        </view>
+        <text class="auth__brand-text">学习平台</text>
       </view>
 
-      <view class="field">
-        <text class="field__label">账号</text>
-        <input
-          v-model="form.username"
-          class="field__input"
-          placeholder="2-20 个字符"
-          placeholder-class="field__ph"
-          :maxlength="20"
-        />
-      </view>
+      <text class="auth__title">创建账号</text>
+      <text class="auth__sub">注册后即可开始学习</text>
 
-      <view class="field">
-        <text class="field__label">密码</text>
-        <input
-          v-model="form.password"
-          class="field__input"
-          password
-          placeholder="5-20 个字符"
-          placeholder-class="field__ph"
-          :maxlength="20"
-        />
-      </view>
-
-      <view class="field">
-        <text class="field__label">确认密码</text>
-        <input
-          v-model="form.confirmPassword"
-          class="field__input"
-          password
-          placeholder="请再次输入密码"
-          placeholder-class="field__ph"
-          :maxlength="20"
-        />
-      </view>
-
-      <view v-if="captchaOn" class="field">
-        <text class="field__label">验证码</text>
-        <view class="field__row">
+      <view class="card">
+        <view class="field">
+          <text class="field__label">账号</text>
           <input
-            v-model="form.code"
-            class="field__input field__input--code"
-            placeholder="请输入计算结果"
+            v-model="form.username"
+            class="field__input"
+            placeholder="2-20 个字符"
             placeholder-class="field__ph"
-            :maxlength="4"
+            :maxlength="20"
           />
-          <view class="captcha" @click="loadCaptcha">
-            <image v-if="captcha.img" class="captcha__img" :src="captcha.img" mode="aspectFit" />
-            <text v-else class="captcha__text">{{ captcha.mockText || '----' }}</text>
+        </view>
+
+        <view class="field">
+          <text class="field__label">密码</text>
+          <input
+            v-model="form.password"
+            class="field__input"
+            password
+            placeholder="5-20 个字符"
+            placeholder-class="field__ph"
+            :maxlength="20"
+          />
+        </view>
+
+        <view class="field">
+          <text class="field__label">确认密码</text>
+          <input
+            v-model="form.confirmPassword"
+            class="field__input"
+            password
+            placeholder="请再次输入密码"
+            placeholder-class="field__ph"
+            :maxlength="20"
+          />
+        </view>
+
+        <view v-if="captchaOn" class="field">
+          <text class="field__label">验证码</text>
+          <view class="field__row">
+            <input
+              v-model="form.code"
+              class="field__input field__input--code"
+              placeholder="请输入计算结果"
+              placeholder-class="field__ph"
+              :maxlength="4"
+            />
+            <view class="captcha" @click="loadCaptcha">
+              <image v-if="captcha.img" class="captcha__img" :src="captcha.img" mode="aspectFit" />
+              <text v-else class="captcha__text">{{ captcha.mockText || '----' }}</text>
+            </view>
           </view>
         </view>
-      </view>
 
-      <button class="submit" :loading="loading" :disabled="loading" @click="onSubmit">
-        {{ loading ? '注册中' : '注 册' }}
-      </button>
+        <button class="submit" :loading="loading" :disabled="loading" @click="onSubmit">
+          {{ loading ? '注册中' : '注 册' }}
+        </button>
+      </view>
 
       <view class="auth__foot">
         <text class="auth__foot-text">已经有账号了？</text>
@@ -168,119 +181,5 @@ function goLogin(): void {
 </script>
 
 <style lang="scss" scoped>
-.auth {
-  padding: 60rpx $uni-spacing-row-lg 0;
-
-  &__head {
-    margin-bottom: 64rpx;
-  }
-
-  &__title {
-    display: block;
-    font-size: 48rpx;
-    font-weight: 600;
-  }
-
-  &__sub {
-    display: block;
-    margin-top: 12rpx;
-    font-size: $uni-font-size-sm;
-    color: $uni-text-color-grey;
-  }
-
-  &__foot {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 44rpx;
-    font-size: $uni-font-size-sm;
-  }
-
-  &__foot-text {
-    color: $uni-text-color-grey;
-  }
-
-  &__foot-link {
-    margin-left: 8rpx;
-    color: $uni-color-primary;
-  }
-}
-
-.field {
-  margin-bottom: 36rpx;
-
-  &__label {
-    display: block;
-    margin-bottom: 14rpx;
-    font-size: $uni-font-size-sm;
-    color: $uni-text-color-grey;
-  }
-
-  &__row {
-    display: flex;
-    align-items: center;
-  }
-
-  &__input {
-    width: 100%;
-    height: 88rpx;
-    padding: 0 24rpx;
-    background-color: #f4f6f9;
-    border-radius: 12rpx;
-    font-size: $uni-font-size-base;
-    color: $uni-text-color;
-  }
-
-  &__input--code {
-    flex: 1;
-    width: auto;
-  }
-
-  &__ph {
-    color: $uni-text-color-placeholder;
-  }
-}
-
-.captcha {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 220rpx;
-  height: 88rpx;
-  margin-left: 20rpx;
-  background-color: #eef2fb;
-  border-radius: 12rpx;
-  overflow: hidden;
-
-  &__img {
-    width: 100%;
-    height: 100%;
-  }
-
-  &__text {
-    font-size: 32rpx;
-    font-weight: 600;
-    letter-spacing: 2rpx;
-    color: #3b6fd4;
-    white-space: nowrap;
-  }
-}
-
-.submit {
-  height: 92rpx;
-  margin-top: 20rpx;
-  line-height: 92rpx;
-  font-size: 32rpx;
-  color: #ffffff;
-  background-color: $uni-color-primary;
-  border-radius: 12rpx;
-
-  &::after {
-    border: none;
-  }
-
-  &[disabled] {
-    opacity: 0.6;
-  }
-}
+@import './auth.scss';
 </style>

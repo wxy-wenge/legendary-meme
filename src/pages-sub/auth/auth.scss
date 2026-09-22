@@ -1,0 +1,211 @@
+/* 登录 / 注册页共用样式。两个页面各自 @import 一份，避免改一处抄两遍。 */
+
+.auth-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(168deg, #e9f0ff 0%, #f6f8fc 45%, #eef3fb 100%);
+}
+
+/* ---------- 背景光斑 ---------- */
+
+.bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  &__blob {
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  &__blob--a {
+    top: -200rpx;
+    right: -180rpx;
+    width: 560rpx;
+    height: 560rpx;
+    background: linear-gradient(140deg, #c8dcff, #e8f1ff);
+    opacity: 0.75;
+  }
+
+  &__blob--b {
+    top: 280rpx;
+    left: -170rpx;
+    width: 380rpx;
+    height: 380rpx;
+    background: linear-gradient(140deg, #d6e4ff, #f2f7ff);
+    opacity: 0.6;
+  }
+
+  &__blob--c {
+    right: 20rpx;
+    bottom: -130rpx;
+    width: 320rpx;
+    height: 320rpx;
+    background: linear-gradient(140deg, #e2ecff, #f8fbff);
+    opacity: 0.65;
+  }
+}
+
+/* ---------- 内容区 ---------- */
+
+.auth {
+  position: relative;
+  padding: 110rpx 48rpx 80rpx;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    margin-bottom: 56rpx;
+  }
+
+  &__mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 76rpx;
+    height: 76rpx;
+    background: linear-gradient(140deg, #4f93ff, #2f6bff);
+    border-radius: 22rpx;
+    box-shadow: 0 10rpx 22rpx rgba(47, 107, 255, 0.28);
+  }
+
+  &__glyph {
+    font-size: 38rpx;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  &__brand-text {
+    margin-left: 20rpx;
+    font-size: 30rpx;
+    font-weight: 600;
+    color: #2b3a55;
+  }
+
+  &__title {
+    display: block;
+    font-size: 52rpx;
+    font-weight: 600;
+    color: #1f2d45;
+  }
+
+  &__sub {
+    display: block;
+    margin-top: 14rpx;
+    font-size: $uni-font-size-sm;
+    color: #8a94a6;
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 48rpx;
+    font-size: $uni-font-size-sm;
+  }
+
+  &__foot-text {
+    color: #8a94a6;
+  }
+
+  &__foot-link {
+    margin-left: 8rpx;
+    font-weight: 500;
+    color: #2f6bff;
+  }
+}
+
+/* ---------- 表单卡片 ---------- */
+
+.card {
+  padding: 44rpx 40rpx 40rpx;
+  margin-top: 48rpx;
+  background-color: #ffffff;
+  border-radius: 28rpx;
+  box-shadow: 0 16rpx 48rpx rgba(31, 66, 135, 0.08);
+}
+
+.field {
+  margin-bottom: 32rpx;
+
+  &__label {
+    display: block;
+    margin-bottom: 14rpx;
+    font-size: $uni-font-size-sm;
+    color: #8a94a6;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+  }
+
+  &__input {
+    width: 100%;
+    height: 88rpx;
+    padding: 0 26rpx;
+    background-color: #f5f7fb;
+    border: 2rpx solid #eef1f7;
+    border-radius: 16rpx;
+    font-size: $uni-font-size-base;
+    color: #1f2d45;
+  }
+
+  &__input--code {
+    flex: 1;
+    width: auto;
+  }
+
+  &__ph {
+    color: #aab2c0;
+  }
+}
+
+.captcha {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 220rpx;
+  height: 88rpx;
+  margin-left: 20rpx;
+  background: linear-gradient(140deg, #eef3ff, #e4ecff);
+  border: 2rpx solid #dde6ff;
+  border-radius: 16rpx;
+  overflow: hidden;
+
+  &__img {
+    width: 100%;
+    height: 100%;
+  }
+
+  &__text {
+    font-size: 32rpx;
+    font-weight: 600;
+    letter-spacing: 2rpx;
+    color: #2f6bff;
+    white-space: nowrap;
+  }
+}
+
+.submit {
+  height: 92rpx;
+  margin-top: 16rpx;
+  line-height: 92rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #ffffff;
+  background: linear-gradient(135deg, #4f93ff 0%, #2f6bff 100%);
+  border-radius: 16rpx;
+  box-shadow: 0 12rpx 28rpx rgba(47, 107, 255, 0.28);
+
+  &::after {
+    border: none;
+  }
+
+  &[disabled] {
+    opacity: 0.65;
+  }
+}
