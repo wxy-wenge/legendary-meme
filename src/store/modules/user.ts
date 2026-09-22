@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { userApi } from '@/api/modules/user'
-import type { LoginParams, UserInfo } from '@/api/types'
+import type { LoginParams, RegisterParams, UserInfo } from '@/api/types'
 import { clearToken, getToken, setToken } from '@/utils/auth'
 import { uniStorage } from '../persist'
 
@@ -33,6 +33,11 @@ export const useUserStore = defineStore(
       return fetchProfile()
     }
 
+    /** 注册：若依的 /register。注册成功后不自动登录，由页面跳回登录页 */
+    async function register(params: RegisterParams): Promise<void> {
+      await userApi.register(params)
+    }
+
     async function fetchProfile(): Promise<UserInfo> {
       const info = await userApi.getInfo()
       userInfo.value = info.user
@@ -59,6 +64,7 @@ export const useUserStore = defineStore(
       setSession,
       setUserInfo,
       login,
+      register,
       fetchProfile,
       logout
     }

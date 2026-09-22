@@ -28,6 +28,18 @@
           "style": {
             "navigationBarTitleText": "空白页"
           }
+        },
+        {
+          "path": "auth/login",
+          "style": {
+            "navigationBarTitleText": "登录"
+          }
+        },
+        {
+          "path": "auth/register",
+          "style": {
+            "navigationBarTitleText": "注册"
+          }
         }
       ]
     }

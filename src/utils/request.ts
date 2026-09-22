@@ -1,4 +1,11 @@
-import { API_BASE_URL, API_SUCCESS_CODE, API_UNAUTHORIZED_CODE, REQUEST_TIMEOUT } from '@/config'
+import {
+  API_BASE_URL,
+  API_SUCCESS_CODE,
+  API_UNAUTHORIZED_CODE,
+  REQUEST_TIMEOUT,
+  USE_MOCK
+} from '@/config'
+import { mockRequest } from '@/api/mock'
 import { clearToken, getToken } from './auth'
 
 export interface ApiResponse<T = unknown> {
@@ -67,6 +74,26 @@ export function buildUrl(url: string): string {
   return `${base}${path}`
 }
 
+function send(
+  url: string,
+  method: HttpMethod,
+  data: unknown,
+  header: Record<string, string>,
+  timeout: number
+): Promise<UniRequestSuccess> {
+  return new Promise<UniRequestSuccess>((resolve, reject) => {
+    uni.request({
+      url,
+      method,
+      data: data as UniRequestOptions['data'],
+      header,
+      timeout,
+      success: resolve,
+      fail: reject
+    })
+  })
+}
+
 function normalizeError(err: unknown): RequestError {
   if (err instanceof RequestError) return err
 
@@ -111,17 +138,15 @@ export async function request<T = unknown>(config: RequestConfig): Promise<T> {
   if (loading) openLoading('加载中...')
 
   try {
-    const res = await new Promise<UniRequestSuccess>((resolve, reject) => {
-      uni.request({
-        url: buildUrl(url),
-        method,
-        data: data as UniRequestOptions['data'],
-        header: finalHeader,
-        timeout,
-        success: resolve,
-        fail: reject
-      })
-    })
+    const fullUrl = buildUrl(url)
+
+    // 模拟层：后端接口就绪前，用它把前端流程跑通（见 src/api/mock.ts）。
+    // 没命中就返回 null，继续走真实请求。
+    const mocked = USE_MOCK ? await mockRequest({ url: fullUrl, method, data }) : null
+
+    const res: UniRequestSuccess = mocked
+      ? (mocked as unknown as UniRequestSuccess)
+      : await send(fullUrl, method, data, finalHeader, timeout)
 
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw new RequestError(`请求失败（HTTP ${res.statusCode}）`, res.statusCode, res.data)

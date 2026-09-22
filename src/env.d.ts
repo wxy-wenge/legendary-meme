@@ -12,4 +12,5 @@ interface ImportMetaEnv {
   readonly VITE_PROXY_TARGET: string
   readonly VITE_DEV_HOST: string
   readonly VITE_DEV_PORT: string
+  readonly VITE_USE_MOCK: string
 }

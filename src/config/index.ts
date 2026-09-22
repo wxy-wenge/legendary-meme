@@ -23,3 +23,9 @@ export const REQUEST_TIMEOUT = Number(env.VITE_REQUEST_TIMEOUT ?? 15000)
 
 /** 本地存储 key 前缀，避免同域名下多应用互相覆盖 */
 export const STORAGE_PREFIX = env.VITE_STORAGE_PREFIX || 'uni_app_'
+
+/**
+ * 是否启用前端模拟数据。
+ * 后端接口就绪前设为 true，请求会被 src/api/mock.ts 拦下并返回假数据。
+ */
+export const USE_MOCK = env.VITE_USE_MOCK === 'true'

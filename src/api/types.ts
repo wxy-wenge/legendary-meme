@@ -12,6 +12,11 @@ export interface LoginParams {
   uuid?: string
 }
 
+/** 注册参数（若依 POST /register：比登录多一个确认密码） */
+export interface RegisterParams extends LoginParams {
+  confirmPassword: string
+}
+
 /** 验证码返回（GET /captchaImage） */
 export interface CaptchaResult {
   /** 是否开启验证码；false 时前端可隐藏验证码输入框 */
@@ -19,6 +24,11 @@ export interface CaptchaResult {
   uuid?: string
   /** base64 图片（data:image/...;base64,xxxx），开启验证码时用于 <image> 显示 */
   img?: string
+  /**
+   * 仅前端模拟层返回（见 src/api/mock.ts）：验证码明文。
+   * 后端不会返回这个字段，接入真实接口后自动失效。
+   */
+  mockCode?: string
 }
 
 /** 登录返回（POST /login，token 在响应顶层，不在 data 里） */
