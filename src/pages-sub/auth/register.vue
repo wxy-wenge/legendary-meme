@@ -28,7 +28,7 @@
       </view>
     </view>
 
-    <view class="auth">
+    <view class="auth paper-content">
       <view class="auth__brand">
         <view class="auth__mark">
           <text class="auth__glyph">学</text>
