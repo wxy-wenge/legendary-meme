@@ -1,72 +1,81 @@
 <template>
-  <view class="mine">
-    <!-- 顶部用户卡片 -->
-    <view class="hero">
-      <view class="hero__blob"></view>
+  <view class="paper-page">
+    <!-- 背景装饰层：纯装饰，都在内容区之外 -->
+    <view class="deco">
+      <view class="deco__glow"></view>
+      <view class="deco__rule"></view>
+      <view class="deco__ring deco__ring--lg"></view>
+      <view class="deco__arc deco__arc--a"></view>
+      <view class="deco__arc deco__arc--b"></view>
+      <view class="deco__plant">
+        <view class="deco__plant-stem"></view>
+        <view class="deco__leaf deco__leaf--a"></view>
+        <view class="deco__leaf deco__leaf--b"></view>
+      </view>
+      <view class="deco__book">
+        <view class="deco__book-page deco__book-page--l"></view>
+        <view class="deco__book-page deco__book-page--r"></view>
+      </view>
+      <view class="deco__note"></view>
+    </view>
 
-      <view v-if="isLogged" class="hero__main">
+    <!-- 未登录 -->
+    <view v-if="!isLogged" class="mine paper-content">
+      <view class="guest">
+        <view class="guest__mark">
+          <text class="guest__glyph">学</text>
+        </view>
+        <text class="guest__title">还没有登录</text>
+        <text class="guest__desc">登录后可以记录学习进度、收藏课程</text>
+        <button class="btn btn--primary" @click="goLogin">登录 / 注册</button>
+      </view>
+    </view>
+
+    <!-- 已登录 -->
+    <view v-else class="mine paper-content">
+      <view class="profile">
         <view class="avatar">
           <image v-if="avatar" class="avatar__img" :src="avatar" mode="aspectFill" />
           <text v-else class="avatar__letter">{{ avatarLetter }}</text>
         </view>
-        <view class="hero__text">
-          <text class="hero__name">{{ nickname }}</text>
-          <text class="hero__account">账号：{{ account }}</text>
+        <view class="profile__text">
+          <text class="profile__name">{{ nickname }}</text>
+          <text class="profile__account">账号：{{ account }}</text>
         </view>
       </view>
 
-      <view v-else class="hero__main">
-        <view class="avatar avatar--guest">
-          <text class="avatar__letter">?</text>
-        </view>
-        <view class="hero__text">
-          <text class="hero__name">还没有登录</text>
-          <text class="hero__account">登录后查看个人信息</text>
-        </view>
-      </view>
-    </view>
+      <view class="section">
+        <text class="section__title">个人信息</text>
 
-    <!-- 未登录 -->
-    <view v-if="!isLogged" class="card card--lift">
-      <button class="btn btn--primary" @click="goLogin">登录 / 注册</button>
-    </view>
-
-    <!-- 已登录 -->
-    <template v-else>
-      <view class="card card--lift">
-        <text class="card__title">个人信息</text>
-
-        <view class="cell">
-          <text class="cell__label">昵称</text>
-          <text class="cell__value">{{ nickname }}</text>
+        <view class="row">
+          <text class="row__label">昵称</text>
+          <text class="row__value">{{ nickname }}</text>
         </view>
 
-        <view class="cell">
-          <text class="cell__label">账号</text>
-          <text class="cell__value">{{ account }}</text>
+        <view class="row">
+          <text class="row__label">账号</text>
+          <text class="row__value">{{ account }}</text>
         </view>
 
-        <view class="cell">
-          <text class="cell__label">手机号</text>
-          <text class="cell__value" :class="{ 'cell__value--empty': !phone }">
+        <view class="row">
+          <text class="row__label">手机号</text>
+          <text class="row__value" :class="{ 'row__value--empty': !phone }">
             {{ phone || '未设置' }}
           </text>
         </view>
 
-        <view class="cell">
-          <text class="cell__label">邮箱</text>
-          <text class="cell__value" :class="{ 'cell__value--empty': !email }">
+        <view class="row row--last">
+          <text class="row__label">邮箱</text>
+          <text class="row__value" :class="{ 'row__value--empty': !email }">
             {{ email || '未设置' }}
           </text>
         </view>
       </view>
 
-      <!-- 后续加「我的课程 / 收藏 / 设置」之类的入口，照这个卡片往下复制即可 -->
+      <!-- 以后加「我的课程 / 收藏 / 设置」之类的入口，照这个 section 往下复制即可 -->
 
-      <view class="card">
-        <button class="btn" @click="onLogout">退出登录</button>
-      </view>
-    </template>
+      <button class="btn btn--ghost" @click="onLogout">退出登录</button>
+    </view>
   </view>
 </template>
 
@@ -102,36 +111,58 @@ function onLogout(): void {
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/book-theme.scss';
+
 .mine {
-  min-height: 100vh;
-  padding-bottom: 40rpx;
-  background-color: $uni-bg-color-grey;
+  padding: 150rpx 56rpx 120rpx;
 }
 
-/* ---------- 顶部 ---------- */
+/* ---------- 未登录 ---------- */
 
-.hero {
-  position: relative;
-  padding: 60rpx 40rpx 100rpx;
-  overflow: hidden;
-  background: linear-gradient(150deg, #dfe9ff 0%, #eef4ff 55%, #f6f8fc 100%);
+.guest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  &__blob {
-    position: absolute;
-    top: -160rpx;
-    right: -140rpx;
-    width: 420rpx;
-    height: 420rpx;
-    background: linear-gradient(140deg, #c3d8ff, #e6efff);
-    border-radius: 50%;
-    opacity: 0.7;
-  }
-
-  &__main {
-    position: relative;
+  /* 比登录页的品牌标记更大、圆角更大，跟头像(圆形)、按钮(6rpx)区分开 */
+  &__mark {
     display: flex;
     align-items: center;
+    justify-content: center;
+    width: 136rpx;
+    height: 136rpx;
+    background-color: $ink;
+    border-radius: 30rpx;
   }
+
+  &__glyph {
+    font-size: 64rpx;
+    font-weight: 600;
+    color: $paper;
+  }
+
+  &__title {
+    margin-top: 52rpx;
+    font-size: 44rpx;
+    font-weight: 600;
+    letter-spacing: 2rpx;
+    color: $ink;
+  }
+
+  &__desc {
+    margin-top: 20rpx;
+    font-size: 26rpx;
+    line-height: 1.8;
+    letter-spacing: 1rpx;
+    color: $warm-gray;
+  }
+}
+
+/* ---------- 已登录 ---------- */
+
+.profile {
+  display: flex;
+  align-items: center;
 
   &__text {
     flex: 1;
@@ -141,16 +172,17 @@ function onLogout(): void {
 
   &__name {
     display: block;
-    font-size: 40rpx;
+    font-size: 44rpx;
     font-weight: 600;
-    color: #1f2d45;
+    letter-spacing: 2rpx;
+    color: $ink;
   }
 
   &__account {
     display: block;
-    margin-top: 10rpx;
-    font-size: $uni-font-size-sm;
-    color: #7c869a;
+    margin-top: 12rpx;
+    font-size: 26rpx;
+    color: $warm-gray;
   }
 }
 
@@ -160,15 +192,9 @@ function onLogout(): void {
   justify-content: center;
   width: 128rpx;
   height: 128rpx;
-  background: linear-gradient(140deg, #4f93ff, #2f6bff);
+  background-color: $ink;
   border-radius: 50%;
-  box-shadow: 0 10rpx 24rpx rgba(47, 107, 255, 0.26);
   overflow: hidden;
-
-  &--guest {
-    background: linear-gradient(140deg, #b9c3d6, #d7dee9);
-    box-shadow: none;
-  }
 
   &__img {
     width: 100%;
@@ -178,61 +204,49 @@ function onLogout(): void {
   &__letter {
     font-size: 52rpx;
     font-weight: 600;
-    color: #ffffff;
+    color: $paper;
   }
 }
 
-/* ---------- 卡片 ---------- */
-
-.card {
-  padding: 12rpx 32rpx;
-  margin: 0 24rpx 24rpx;
-  background-color: #ffffff;
-  border-radius: 24rpx;
-  box-shadow: 0 10rpx 30rpx rgba(31, 66, 135, 0.07);
-
-  /* 首张卡片往上提，压住头部渐变区 */
-  &--lift {
-    margin-top: -60rpx;
-  }
+.section {
+  margin-top: 80rpx;
 
   &__title {
     display: block;
-    padding: 32rpx 0 8rpx;
-    font-size: $uni-font-size-sm;
-    color: #8a94a6;
+    font-size: 26rpx;
+    letter-spacing: 2rpx;
+    color: $warm-gray;
   }
 }
 
-/* ---------- 信息行 ---------- */
-
-.cell {
+/* 信息行用下划线分隔，和登录页的下划线输入是同一套语言 */
+.row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 30rpx 0;
-  border-bottom: 2rpx solid #f2f4f8;
+  padding: 32rpx 0;
+  border-bottom: 2rpx solid rgba(24, 58, 55, 0.1);
 
-  &:last-child {
+  &--last {
     border-bottom: none;
   }
 
   &__label {
     flex-shrink: 0;
     margin-right: 24rpx;
-    font-size: $uni-font-size-base;
-    color: #4a5568;
+    font-size: 30rpx;
+    color: $warm-gray;
   }
 
   &__value {
     flex: 1;
-    font-size: $uni-font-size-base;
-    color: #1f2d45;
+    font-size: 30rpx;
+    color: $ink;
     text-align: right;
     word-break: break-all;
 
     &--empty {
-      color: #b3bac7;
+      color: rgba(138, 129, 124, 0.6);
     }
   }
 }
@@ -240,22 +254,28 @@ function onLogout(): void {
 /* ---------- 按钮 ---------- */
 
 .btn {
-  height: 88rpx;
-  margin: 24rpx 0;
-  line-height: 88rpx;
+  height: 96rpx;
+  line-height: 96rpx;
   font-size: 30rpx;
-  color: #4a5568;
-  background-color: #f5f7fb;
-  border-radius: 16rpx;
+  letter-spacing: 4rpx;
+  border-radius: 6rpx;
 
   &::after {
     border: none;
   }
 
   &--primary {
-    color: #ffffff;
-    background: linear-gradient(135deg, #4f93ff 0%, #2f6bff 100%);
-    box-shadow: 0 10rpx 24rpx rgba(47, 107, 255, 0.24);
+    width: 440rpx;
+    margin-top: 76rpx;
+    color: $paper;
+    background-color: $ink;
+  }
+
+  &--ghost {
+    margin-top: 64rpx;
+    color: $ink;
+    background-color: transparent;
+    border: 2rpx solid rgba(24, 58, 55, 0.28);
   }
 }
 </style>

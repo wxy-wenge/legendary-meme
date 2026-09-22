@@ -1,5 +1,5 @@
-<template>
-  <view class="auth-page">
+﻿<template>
+  <view class="paper-page">
     <!-- 背景装饰层：纯装饰，全部在表单区域之外 -->
     <view class="deco">
       <view class="deco__glow"></view>

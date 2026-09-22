@@ -1,0 +1,278 @@
+/* 书卷风主题：奶油白纸面 + 深墨绿主色 + 珊瑚橙点缀。
+ *
+ * 登录 / 注册页和个人页共用这一套，避免两个页面各写一套导致风格割裂。
+ * 改配色或调装饰，只改这个文件。
+ *
+ * 装饰全部靠在版面边缘，给内容留出干净区域：
+ *   屏宽 750rpx，正文列 x 56~694，底部居中的文字约 x 241~509。
+ *   左侧装饰横向不超过 208，右侧装饰不低于 550，所以中间一条始终是空的。
+ */
+
+$paper: #f7f1e8;
+$ink: #183a37;
+$warm-gray: #8a817c;
+$coral: #ff6b4a;
+
+/* ---------- 纸面 ---------- */
+
+.paper-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background-color: $paper;
+  /* 纸张颗粒：两层错位的细点，避免规则的网格感 */
+  background-image:
+    radial-gradient(rgba(24, 58, 55, 0.05) 1rpx, transparent 1rpx),
+    radial-gradient(rgba(138, 129, 124, 0.055) 1rpx, transparent 1rpx);
+  background-size:
+    14rpx 14rpx,
+    23rpx 23rpx;
+  background-position:
+    0 0,
+    7rpx 9rpx;
+}
+
+/* 内容层要压在装饰层上面，否则点不到表单 */
+.paper-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- 装饰层 ---------- */
+
+.deco {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  /* 纯装饰，不参与交互（不支持的端会忽略，z-index 仍保证内容在上层） */
+  pointer-events: none;
+}
+
+/* 右上角珊瑚橙柔光斑。小程序 filter: blur 支持不稳，
+   改用径向渐变从中心向外淡出，视觉上等价 */
+.deco__glow {
+  position: absolute;
+  top: -220rpx;
+  right: -200rpx;
+  width: 680rpx;
+  height: 680rpx;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 107, 74, 0.3) 0%,
+    rgba(255, 107, 74, 0.13) 42%,
+    rgba(255, 107, 74, 0) 72%
+  );
+}
+
+/* 抽象进度环：留一个缺口 */
+.deco__progress {
+  position: absolute;
+  top: 150rpx;
+  right: 72rpx;
+  width: 104rpx;
+  height: 104rpx;
+  border: 6rpx solid rgba(255, 107, 74, 0.16);
+  border-top-color: rgba(255, 107, 74, 0.5);
+  border-radius: 50%;
+  transform: rotate(38deg);
+}
+
+/* 左上小圆环，露出小半个在版面外侧 */
+.deco__ring--sm {
+  position: absolute;
+  top: 80rpx;
+  left: -96rpx;
+  width: 150rpx;
+  height: 150rpx;
+  border: 2rpx solid rgba(24, 58, 55, 0.13);
+  border-radius: 50%;
+}
+
+/* 知识卡片：里面画两道「文字线」 */
+.deco__card {
+  position: absolute;
+  top: 336rpx;
+  right: -44rpx;
+  width: 148rpx;
+  height: 104rpx;
+  padding: 20rpx 16rpx;
+  background-color: rgba(255, 252, 246, 0.82);
+  border: 2rpx solid rgba(24, 58, 55, 0.1);
+  border-radius: 12rpx;
+  transform: rotate(-8deg);
+}
+
+.deco__card-line {
+  height: 2rpx;
+  margin-bottom: 14rpx;
+  background-color: rgba(24, 58, 55, 0.14);
+}
+
+.deco__card-line--short {
+  width: 58%;
+  margin-bottom: 0;
+}
+
+/* 版心细线，杂志感 */
+.deco__rule {
+  position: absolute;
+  top: 470rpx;
+  left: 26rpx;
+  width: 2rpx;
+  height: 700rpx;
+  background: linear-gradient(
+    180deg,
+    rgba(24, 58, 55, 0) 0%,
+    rgba(24, 58, 55, 0.16) 28%,
+    rgba(24, 58, 55, 0.16) 72%,
+    rgba(24, 58, 55, 0) 100%
+  );
+}
+
+/* 左下大圆环 */
+.deco__ring--lg {
+  position: absolute;
+  left: -220rpx;
+  bottom: -150rpx;
+  width: 420rpx;
+  height: 420rpx;
+  border: 3rpx solid rgba(24, 58, 55, 0.13);
+  border-radius: 50%;
+}
+
+/* 手绘弧线：只画圆的两条边 */
+.deco__arc {
+  position: absolute;
+  border: 2rpx solid transparent;
+  border-top-color: rgba(24, 58, 55, 0.2);
+  border-right-color: rgba(24, 58, 55, 0.2);
+  border-radius: 50%;
+}
+
+.deco__arc--a {
+  left: 20rpx;
+  bottom: 150rpx;
+  width: 160rpx;
+  height: 160rpx;
+  transform: rotate(-24deg);
+}
+
+.deco__arc--b {
+  left: 120rpx;
+  bottom: 60rpx;
+  width: 88rpx;
+  height: 88rpx;
+  transform: rotate(30deg);
+  border-top-color: rgba(255, 107, 74, 0.28);
+  border-right-color: rgba(255, 107, 74, 0.28);
+}
+
+/* 便签：一角小圆角，像折了一角 */
+.deco__note {
+  position: absolute;
+  right: 34rpx;
+  bottom: -30rpx;
+  width: 104rpx;
+  height: 104rpx;
+  background-color: rgba(255, 107, 74, 0.1);
+  border-left: 5rpx solid rgba(255, 107, 74, 0.26);
+  border-radius: 4rpx 16rpx 16rpx 16rpx;
+  transform: rotate(-10deg);
+}
+
+/* 植物线条：一根茎 + 两片叶子 */
+.deco__plant {
+  position: absolute;
+  left: 30rpx;
+  bottom: 120rpx;
+  width: 120rpx;
+  height: 160rpx;
+  transform: rotate(10deg);
+}
+
+.deco__plant-stem {
+  position: absolute;
+  top: 0;
+  left: 58rpx;
+  width: 2rpx;
+  height: 142rpx;
+  background-color: rgba(24, 58, 55, 0.18);
+  border-radius: 2rpx;
+}
+
+.deco__leaf {
+  position: absolute;
+  width: 30rpx;
+  height: 16rpx;
+  background-color: rgba(24, 58, 55, 0.12);
+  border-radius: 50% 0 50% 0;
+}
+
+.deco__leaf--a {
+  top: 42rpx;
+  left: 58rpx;
+  transform: rotate(-14deg);
+}
+
+.deco__leaf--b {
+  top: 84rpx;
+  left: 30rpx;
+  transform: rotate(160deg);
+}
+
+/* 翻开的书页：两片向中间倾斜 */
+.deco__book {
+  position: absolute;
+  right: 30rpx;
+  bottom: 110rpx;
+  width: 148rpx;
+  height: 92rpx;
+}
+
+.deco__book-page {
+  position: absolute;
+  top: 0;
+  width: 70rpx;
+  height: 92rpx;
+  background-color: rgba(255, 252, 246, 0.86);
+  border: 2rpx solid rgba(24, 58, 55, 0.13);
+}
+
+.deco__book-page--l {
+  left: 0;
+  border-radius: 12rpx 2rpx 2rpx 12rpx;
+  transform: rotate(-7deg);
+  transform-origin: right center;
+}
+
+.deco__book-page--r {
+  right: 0;
+  border-radius: 2rpx 12rpx 12rpx 2rpx;
+  transform: rotate(7deg);
+  transform-origin: left center;
+}
+
+/* 铅笔：一条细杆 + 珊瑚橙笔尖 */
+.deco__pencil {
+  position: absolute;
+  left: 40rpx;
+  bottom: 26rpx;
+  width: 152rpx;
+  height: 12rpx;
+  background-color: rgba(138, 129, 124, 0.3);
+  border-radius: 6rpx;
+  transform: rotate(-26deg);
+}
+
+.deco__pencil-lead {
+  position: absolute;
+  top: 0;
+  right: -16rpx;
+  width: 18rpx;
+  height: 12rpx;
+  background-color: rgba(255, 107, 74, 0.42);
+  border-radius: 0 6rpx 6rpx 0;
+}
