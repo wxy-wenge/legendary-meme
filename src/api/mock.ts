@@ -11,10 +11,12 @@
  *   - 返回格式 { code, msg, ... }，成功码 200
  *   - 验证码是**数学题**（application.yml 里 captchaType: math）
  *   - 注册的校验顺序和提示语与 SysRegisterService 一致
+ *   - 注册用户的昵称默认等于账号（SysRegisterService 里 setNickName(username)）
  */
 
 const SUCCESS = 200
 const FAIL = 500
+const UNAUTHORIZED = 401
 
 /** 与后端 UserConstants 保持一致 */
 const USERNAME_MIN = 2
@@ -39,10 +41,17 @@ export interface MockRequestOptions {
 /** uuid → 验证码答案 */
 const captchaStore = new Map<string, string>()
 
-/** 账号 → 信息。预置一个演示账号 */
+/**
+ * 账号 → 信息。
+ * 预置的这个只是为了不用注册就能试登录，不需要的话删掉这一行即可。
+ * 昵称和账号保持一致，跟后端注册用户的行为一样（不会凭空造中文昵称）。
+ */
 const users = new Map<string, { password: string; nickName: string }>([
-  ['admin', { password: 'admin123', nickName: '管理员' }]
+  ['admin', { password: 'admin123', nickName: 'admin' }]
 ])
+
+/** 当前登录的账号，getInfo 用它决定返回谁的信息 */
+let currentUser: string | null = null
 
 let uuidSeq = 0
 let tokenSeq = 0
@@ -143,6 +152,7 @@ function mockLogin(raw: unknown): MockResponse {
   if (!user || user.password !== password) return error('用户名或密码错误')
 
   tokenSeq += 1
+  currentUser = username
   return body({ token: `mock-token-${tokenSeq}` })
 }
 
@@ -169,20 +179,34 @@ function mockRegister(raw: unknown): MockResponse {
   }
   if (users.has(username)) return error(`保存用户'${username}'失败，注册账号已存在`)
 
+  // 后端也是把昵称设成账号（SysRegisterService: setNickName(username)）
   users.set(username, { password, nickName: username })
   return body({})
 }
 
+/**
+ * 返回**当前登录账号**的信息。
+ * 没有登录就返回 401，不编造任何用户数据。
+ */
 function mockGetInfo(): MockResponse {
+  if (!currentUser) {
+    return error('认证失败，无法访问系统资源', UNAUTHORIZED)
+  }
+
+  const user = users.get(currentUser)
+
   return body({
     user: {
       userId: 1,
-      userName: 'admin',
-      nickName: '管理员',
-      avatar: ''
+      userName: currentUser,
+      nickName: user?.nickName ?? currentUser,
+      // 头像 / 手机号 / 邮箱后端没给就是空，页面对空值显示「未设置」
+      avatar: '',
+      phonenumber: '',
+      email: ''
     },
-    roles: ['admin'],
-    permissions: ['*:*:*']
+    roles: ['common'],
+    permissions: []
   })
 }
 
