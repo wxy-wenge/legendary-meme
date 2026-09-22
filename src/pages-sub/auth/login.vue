@@ -1,9 +1,31 @@
 <template>
   <view class="auth-page">
-    <view class="bg">
-      <view class="bg__blob bg__blob--a"></view>
-      <view class="bg__blob bg__blob--b"></view>
-      <view class="bg__blob bg__blob--c"></view>
+    <!-- 背景装饰层：纯装饰，全部在表单区域之外 -->
+    <view class="deco">
+      <view class="deco__glow"></view>
+      <view class="deco__ring deco__ring--sm"></view>
+      <view class="deco__progress"></view>
+      <view class="deco__card">
+        <view class="deco__card-line"></view>
+        <view class="deco__card-line deco__card-line--short"></view>
+      </view>
+      <view class="deco__rule"></view>
+      <view class="deco__ring deco__ring--lg"></view>
+      <view class="deco__arc deco__arc--a"></view>
+      <view class="deco__arc deco__arc--b"></view>
+      <view class="deco__plant">
+        <view class="deco__plant-stem"></view>
+        <view class="deco__leaf deco__leaf--a"></view>
+        <view class="deco__leaf deco__leaf--b"></view>
+      </view>
+      <view class="deco__note"></view>
+      <view class="deco__book">
+        <view class="deco__book-page deco__book-page--l"></view>
+        <view class="deco__book-page deco__book-page--r"></view>
+      </view>
+      <view class="deco__pencil">
+        <view class="deco__pencil-lead"></view>
+      </view>
     </view>
 
     <view class="auth">
@@ -17,7 +39,7 @@
       <text class="auth__title">欢迎回来</text>
       <text class="auth__sub">登录后继续你的学习</text>
 
-      <view class="card">
+      <view class="form">
         <view class="field">
           <text class="field__label">账号</text>
           <input

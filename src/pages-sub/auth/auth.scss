@@ -1,157 +1,376 @@
-/* 登录 / 注册页共用样式。两个页面各自 @import 一份，避免改一处抄两遍。 */
+/* 登录 / 注册页共用样式。两个页面各自 @import 一份，避免改一处抄两遍。
+ *
+ * 设计基调：现代书卷感 —— 奶油白纸底 + 深墨绿主色 + 珊瑚橙点缀，轻复古暖调。
+ * 表单不用居中大白卡片，改成下划线式输入，直接落在纸面上，留白干净。
+ */
+
+$paper: #f7f1e8;
+$ink: #183a37;
+$warm-gray: #8a817c;
+$coral: #ff6b4a;
+
+/* ---------- 纸面 ---------- */
 
 .auth-page {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: linear-gradient(168deg, #e9f0ff 0%, #f6f8fc 45%, #eef3fb 100%);
+  background-color: $paper;
+  /* 纸张颗粒：两层错位的细点，避免规则的网格感 */
+  background-image:
+    radial-gradient(rgba(24, 58, 55, 0.05) 1rpx, transparent 1rpx),
+    radial-gradient(rgba(138, 129, 124, 0.055) 1rpx, transparent 1rpx);
+  background-size:
+    14rpx 14rpx,
+    23rpx 23rpx;
+  background-position:
+    0 0,
+    7rpx 9rpx;
 }
 
-/* ---------- 背景光斑 ---------- */
+/* ---------- 背景装饰层 ---------- */
 
-.bg {
+.deco {
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+  /* 纯装饰层，不参与交互（不支持的端会忽略，z-index 仍保证表单在上层） */
+  pointer-events: none;
+}
 
-  &__blob {
-    position: absolute;
-    border-radius: 50%;
-  }
+/* 右上角珊瑚橙柔光斑。小程序 filter: blur 支持不稳，
+   改用径向渐变从中心向外淡出，视觉上等价 */
+.deco__glow {
+  position: absolute;
+  top: -220rpx;
+  right: -200rpx;
+  width: 680rpx;
+  height: 680rpx;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 107, 74, 0.3) 0%,
+    rgba(255, 107, 74, 0.13) 42%,
+    rgba(255, 107, 74, 0) 72%
+  );
+}
 
-  &__blob--a {
-    top: -200rpx;
-    right: -180rpx;
-    width: 560rpx;
-    height: 560rpx;
-    background: linear-gradient(140deg, #c8dcff, #e8f1ff);
-    opacity: 0.75;
-  }
+/* 抽象进度环：留一个缺口 */
+.deco__progress {
+  position: absolute;
+  top: 150rpx;
+  right: 72rpx;
+  width: 104rpx;
+  height: 104rpx;
+  border: 6rpx solid rgba(255, 107, 74, 0.16);
+  border-top-color: rgba(255, 107, 74, 0.5);
+  border-radius: 50%;
+  transform: rotate(38deg);
+}
 
-  &__blob--b {
-    top: 280rpx;
-    left: -170rpx;
-    width: 380rpx;
-    height: 380rpx;
-    background: linear-gradient(140deg, #d6e4ff, #f2f7ff);
-    opacity: 0.6;
-  }
+/* 左上小圆环，压在品牌标记外侧 */
+.deco__ring--sm {
+  position: absolute;
+  top: 96rpx;
+  left: -60rpx;
+  width: 150rpx;
+  height: 150rpx;
+  border: 2rpx solid rgba(24, 58, 55, 0.13);
+  border-radius: 50%;
+}
 
-  &__blob--c {
-    right: 20rpx;
-    bottom: -130rpx;
-    width: 320rpx;
-    height: 320rpx;
-    background: linear-gradient(140deg, #e2ecff, #f8fbff);
-    opacity: 0.65;
-  }
+/* 知识卡片：里面画两道「文字线」 */
+.deco__card {
+  position: absolute;
+  top: 336rpx;
+  right: -44rpx;
+  width: 148rpx;
+  height: 104rpx;
+  padding: 20rpx 16rpx;
+  background-color: rgba(255, 252, 246, 0.82);
+  border: 2rpx solid rgba(24, 58, 55, 0.1);
+  border-radius: 12rpx;
+  transform: rotate(-8deg);
+}
+
+.deco__card-line {
+  height: 2rpx;
+  margin-bottom: 14rpx;
+  background-color: rgba(24, 58, 55, 0.14);
+}
+
+.deco__card-line--short {
+  width: 58%;
+  margin-bottom: 0;
+}
+
+/* 版心细线，杂志感 */
+.deco__rule {
+  position: absolute;
+  top: 470rpx;
+  left: 26rpx;
+  width: 2rpx;
+  height: 760rpx;
+  background: linear-gradient(
+    180deg,
+    rgba(24, 58, 55, 0) 0%,
+    rgba(24, 58, 55, 0.16) 28%,
+    rgba(24, 58, 55, 0.16) 72%,
+    rgba(24, 58, 55, 0) 100%
+  );
+}
+
+/* 左下大圆环 */
+.deco__ring--lg {
+  position: absolute;
+  left: -170rpx;
+  bottom: -140rpx;
+  width: 460rpx;
+  height: 460rpx;
+  border: 3rpx solid rgba(24, 58, 55, 0.13);
+  border-radius: 50%;
+}
+
+/* 手绘弧线：只画圆的两条边 */
+.deco__arc {
+  position: absolute;
+  border: 2rpx solid transparent;
+  border-top-color: rgba(24, 58, 55, 0.2);
+  border-right-color: rgba(24, 58, 55, 0.2);
+  border-radius: 50%;
+}
+
+.deco__arc--a {
+  left: 96rpx;
+  bottom: 186rpx;
+  width: 180rpx;
+  height: 180rpx;
+  transform: rotate(-24deg);
+}
+
+.deco__arc--b {
+  left: 214rpx;
+  bottom: 92rpx;
+  width: 92rpx;
+  height: 92rpx;
+  transform: rotate(30deg);
+  border-top-color: rgba(255, 107, 74, 0.28);
+  border-right-color: rgba(255, 107, 74, 0.28);
+}
+
+/* 便签：一角小圆角，像折了一角 */
+.deco__note {
+  position: absolute;
+  left: 248rpx;
+  bottom: -34rpx;
+  width: 104rpx;
+  height: 104rpx;
+  background-color: rgba(255, 107, 74, 0.1);
+  border-left: 5rpx solid rgba(255, 107, 74, 0.26);
+  border-radius: 4rpx 16rpx 16rpx 16rpx;
+  transform: rotate(-10deg);
+}
+
+/* 植物线条：一根茎 + 两片叶子 */
+.deco__plant {
+  position: absolute;
+  left: 42rpx;
+  bottom: 126rpx;
+  width: 120rpx;
+  height: 160rpx;
+  transform: rotate(10deg);
+}
+
+.deco__plant-stem {
+  position: absolute;
+  top: 0;
+  left: 58rpx;
+  width: 2rpx;
+  height: 142rpx;
+  background-color: rgba(24, 58, 55, 0.18);
+  border-radius: 2rpx;
+}
+
+.deco__leaf {
+  position: absolute;
+  width: 30rpx;
+  height: 16rpx;
+  background-color: rgba(24, 58, 55, 0.12);
+  border-radius: 50% 0 50% 0;
+}
+
+.deco__leaf--a {
+  top: 42rpx;
+  left: 58rpx;
+  transform: rotate(-14deg);
+}
+
+.deco__leaf--b {
+  top: 84rpx;
+  left: 30rpx;
+  transform: rotate(160deg);
+}
+
+/* 翻开的书页：两片向中间倾斜 */
+.deco__book {
+  position: absolute;
+  right: 56rpx;
+  bottom: 96rpx;
+  width: 152rpx;
+  height: 96rpx;
+}
+
+.deco__book-page {
+  position: absolute;
+  top: 0;
+  width: 72rpx;
+  height: 96rpx;
+  background-color: rgba(255, 252, 246, 0.86);
+  border: 2rpx solid rgba(24, 58, 55, 0.13);
+}
+
+.deco__book-page--l {
+  left: 0;
+  border-radius: 12rpx 2rpx 2rpx 12rpx;
+  transform: rotate(-7deg);
+  transform-origin: right center;
+}
+
+.deco__book-page--r {
+  right: 0;
+  border-radius: 2rpx 12rpx 12rpx 2rpx;
+  transform: rotate(7deg);
+  transform-origin: left center;
+}
+
+/* 铅笔：一条细杆 + 珊瑚橙笔尖 */
+.deco__pencil {
+  position: absolute;
+  right: 252rpx;
+  bottom: 40rpx;
+  width: 152rpx;
+  height: 12rpx;
+  background-color: rgba(138, 129, 124, 0.3);
+  border-radius: 6rpx;
+  transform: rotate(-26deg);
+}
+
+.deco__pencil-lead {
+  position: absolute;
+  top: 0;
+  right: -16rpx;
+  width: 18rpx;
+  height: 12rpx;
+  background-color: rgba(255, 107, 74, 0.42);
+  border-radius: 0 6rpx 6rpx 0;
 }
 
 /* ---------- 内容区 ---------- */
 
 .auth {
   position: relative;
-  padding: 110rpx 48rpx 80rpx;
+  z-index: 1;
+  padding: 130rpx 56rpx 110rpx;
 
   &__brand {
     display: flex;
     align-items: center;
-    margin-bottom: 56rpx;
+    margin-bottom: 64rpx;
   }
 
+  /* 品牌标记用 16rpx 圆角，跟按钮(6rpx)、验证码(8rpx)、卡片(12rpx)都不一样 */
   &__mark {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 76rpx;
     height: 76rpx;
-    background: linear-gradient(140deg, #4f93ff, #2f6bff);
-    border-radius: 22rpx;
-    box-shadow: 0 10rpx 22rpx rgba(47, 107, 255, 0.28);
+    background-color: $ink;
+    border-radius: 16rpx;
   }
 
   &__glyph {
     font-size: 38rpx;
     font-weight: 600;
-    color: #ffffff;
+    color: $paper;
   }
 
   &__brand-text {
     margin-left: 20rpx;
     font-size: 30rpx;
     font-weight: 600;
-    color: #2b3a55;
+    letter-spacing: 2rpx;
+    color: $ink;
   }
 
   &__title {
     display: block;
-    font-size: 52rpx;
+    font-size: 54rpx;
     font-weight: 600;
-    color: #1f2d45;
+    letter-spacing: 2rpx;
+    color: $ink;
   }
 
   &__sub {
     display: block;
-    margin-top: 14rpx;
-    font-size: $uni-font-size-sm;
-    color: #8a94a6;
+    margin-top: 16rpx;
+    font-size: 26rpx;
+    letter-spacing: 1rpx;
+    color: $warm-gray;
   }
 
   &__foot {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 48rpx;
-    font-size: $uni-font-size-sm;
+    margin-top: 56rpx;
+    font-size: 26rpx;
   }
 
   &__foot-text {
-    color: #8a94a6;
+    color: $warm-gray;
   }
 
   &__foot-link {
     margin-left: 8rpx;
     font-weight: 500;
-    color: #2f6bff;
+    color: $coral;
   }
 }
 
-/* ---------- 表单卡片 ---------- */
+/* ---------- 表单：下划线式，不套卡片 ---------- */
 
-.card {
-  padding: 44rpx 40rpx 40rpx;
-  margin-top: 48rpx;
-  background-color: #ffffff;
-  border-radius: 28rpx;
-  box-shadow: 0 16rpx 48rpx rgba(31, 66, 135, 0.08);
+.form {
+  margin-top: 60rpx;
 }
 
 .field {
-  margin-bottom: 32rpx;
+  margin-bottom: 44rpx;
 
   &__label {
     display: block;
-    margin-bottom: 14rpx;
-    font-size: $uni-font-size-sm;
-    color: #8a94a6;
+    margin-bottom: 16rpx;
+    font-size: 26rpx;
+    letter-spacing: 1rpx;
+    color: $warm-gray;
   }
 
+  /* 底部对齐，让验证码框和输入下划线齐平 */
   &__row {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
   }
 
   &__input {
     width: 100%;
-    height: 88rpx;
-    padding: 0 26rpx;
-    background-color: #f5f7fb;
-    border: 2rpx solid #eef1f7;
-    border-radius: 16rpx;
-    font-size: $uni-font-size-base;
-    color: #1f2d45;
+    height: 76rpx;
+    padding: 0;
+    background-color: transparent;
+    border-bottom: 2rpx solid rgba(24, 58, 55, 0.22);
+    font-size: 32rpx;
+    color: $ink;
   }
 
   &__input--code {
@@ -160,7 +379,7 @@
   }
 
   &__ph {
-    color: #aab2c0;
+    color: rgba(138, 129, 124, 0.6);
   }
 }
 
@@ -168,13 +387,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 220rpx;
-  height: 88rpx;
-  margin-left: 20rpx;
-  background: linear-gradient(140deg, #eef3ff, #e4ecff);
-  border: 2rpx solid #dde6ff;
-  border-radius: 16rpx;
-  overflow: hidden;
+  width: 200rpx;
+  height: 74rpx;
+  margin-left: 28rpx;
+  background-color: rgba(255, 107, 74, 0.08);
+  border: 2rpx solid rgba(255, 107, 74, 0.26);
+  border-radius: 8rpx;
 
   &__img {
     width: 100%;
@@ -185,27 +403,27 @@
     font-size: 32rpx;
     font-weight: 600;
     letter-spacing: 2rpx;
-    color: #2f6bff;
+    color: $coral;
     white-space: nowrap;
   }
 }
 
+/* 按钮圆角很小，做出「印章」的感觉，跟其他元素区分开 */
 .submit {
-  height: 92rpx;
-  margin-top: 16rpx;
-  line-height: 92rpx;
+  height: 96rpx;
+  margin-top: 28rpx;
+  line-height: 96rpx;
   font-size: 32rpx;
-  font-weight: 500;
-  color: #ffffff;
-  background: linear-gradient(135deg, #4f93ff 0%, #2f6bff 100%);
-  border-radius: 16rpx;
-  box-shadow: 0 12rpx 28rpx rgba(47, 107, 255, 0.28);
+  letter-spacing: 6rpx;
+  color: $paper;
+  background-color: $ink;
+  border-radius: 6rpx;
 
   &::after {
     border: none;
   }
 
   &[disabled] {
-    opacity: 0.65;
+    opacity: 0.6;
   }
 }
