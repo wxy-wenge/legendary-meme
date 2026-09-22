@@ -2,6 +2,10 @@
  *
  * 设计基调：现代书卷感 —— 奶油白纸底 + 深墨绿主色 + 珊瑚橙点缀，轻复古暖调。
  * 表单不用居中大白卡片，改成下划线式输入，直接落在纸面上，留白干净。
+ *
+ * 装饰全部在安全区外，不会压住表单和页脚：
+ *   屏宽 750rpx，内容列 x 56~694，页脚约 x 241~509。
+ *   左侧装饰 x 上限 200、右侧装饰 x 下限 550，所以底部装饰不会跑到页脚底下。
  */
 
 $paper: #f7f1e8;
@@ -70,11 +74,11 @@ $coral: #ff6b4a;
   transform: rotate(38deg);
 }
 
-/* 左上小圆环，压在品牌标记外侧 */
+/* 左上小圆环，露出小半个在版心外侧 */
 .deco__ring--sm {
   position: absolute;
-  top: 96rpx;
-  left: -60rpx;
+  top: 80rpx;
+  left: -96rpx;
   width: 150rpx;
   height: 150rpx;
   border: 2rpx solid rgba(24, 58, 55, 0.13);
@@ -112,7 +116,7 @@ $coral: #ff6b4a;
   top: 470rpx;
   left: 26rpx;
   width: 2rpx;
-  height: 760rpx;
+  height: 700rpx;
   background: linear-gradient(
     180deg,
     rgba(24, 58, 55, 0) 0%,
@@ -122,13 +126,13 @@ $coral: #ff6b4a;
   );
 }
 
-/* 左下大圆环 */
+/* 左下大圆环（缩小并左移，避开页脚） */
 .deco__ring--lg {
   position: absolute;
-  left: -170rpx;
-  bottom: -140rpx;
-  width: 460rpx;
-  height: 460rpx;
+  left: -220rpx;
+  bottom: -150rpx;
+  width: 420rpx;
+  height: 420rpx;
   border: 3rpx solid rgba(24, 58, 55, 0.13);
   border-radius: 50%;
 }
@@ -143,18 +147,18 @@ $coral: #ff6b4a;
 }
 
 .deco__arc--a {
-  left: 96rpx;
-  bottom: 186rpx;
-  width: 180rpx;
-  height: 180rpx;
+  left: 20rpx;
+  bottom: 150rpx;
+  width: 160rpx;
+  height: 160rpx;
   transform: rotate(-24deg);
 }
 
 .deco__arc--b {
-  left: 214rpx;
-  bottom: 92rpx;
-  width: 92rpx;
-  height: 92rpx;
+  left: 120rpx;
+  bottom: 60rpx;
+  width: 88rpx;
+  height: 88rpx;
   transform: rotate(30deg);
   border-top-color: rgba(255, 107, 74, 0.28);
   border-right-color: rgba(255, 107, 74, 0.28);
@@ -163,8 +167,8 @@ $coral: #ff6b4a;
 /* 便签：一角小圆角，像折了一角 */
 .deco__note {
   position: absolute;
-  left: 248rpx;
-  bottom: -34rpx;
+  right: 34rpx;
+  bottom: -30rpx;
   width: 104rpx;
   height: 104rpx;
   background-color: rgba(255, 107, 74, 0.1);
@@ -176,8 +180,8 @@ $coral: #ff6b4a;
 /* 植物线条：一根茎 + 两片叶子 */
 .deco__plant {
   position: absolute;
-  left: 42rpx;
-  bottom: 126rpx;
+  left: 30rpx;
+  bottom: 120rpx;
   width: 120rpx;
   height: 160rpx;
   transform: rotate(10deg);
@@ -216,17 +220,17 @@ $coral: #ff6b4a;
 /* 翻开的书页：两片向中间倾斜 */
 .deco__book {
   position: absolute;
-  right: 56rpx;
-  bottom: 96rpx;
-  width: 152rpx;
-  height: 96rpx;
+  right: 30rpx;
+  bottom: 110rpx;
+  width: 148rpx;
+  height: 92rpx;
 }
 
 .deco__book-page {
   position: absolute;
   top: 0;
-  width: 72rpx;
-  height: 96rpx;
+  width: 70rpx;
+  height: 92rpx;
   background-color: rgba(255, 252, 246, 0.86);
   border: 2rpx solid rgba(24, 58, 55, 0.13);
 }
@@ -248,8 +252,8 @@ $coral: #ff6b4a;
 /* 铅笔：一条细杆 + 珊瑚橙笔尖 */
 .deco__pencil {
   position: absolute;
-  right: 252rpx;
-  bottom: 40rpx;
+  left: 40rpx;
+  bottom: 26rpx;
   width: 152rpx;
   height: 12rpx;
   background-color: rgba(138, 129, 124, 0.3);
