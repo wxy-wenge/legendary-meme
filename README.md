@@ -131,15 +131,25 @@ npm run test:coverage     # 带覆盖率
 
 `src/config/index.ts` 是唯一读取 `import.meta.env` 的地方，业务代码从这里 import 常量。
 
-| 文件               | 提交？ | 用途                                         |
-| ------------------ | ------ | -------------------------------------------- |
-| `.env`             | 是     | 所有环境共享（标题、超时、业务码、存储前缀） |
-| `.env.development` | 是     | 团队共用的开发配置                           |
-| `.env.production`  | 是     | 生产环境，填真实网关地址                     |
-| `.env.local`       | **否** | 个人本地覆盖，从 `.env.local.example` 复制   |
+| 文件                | 提交？ | 用途                                                   |
+| ------------------- | ------ | ------------------------------------------------------ |
+| `.env`              | 是     | 所有环境共享（标题、超时、业务码、存储前缀）           |
+| `.env.development`  | 是     | 团队共用的开发配置                                     |
+| `.env.production`   | 是     | 生产环境，填真实网关地址                               |
+| `.env.<mode>.local` | **否** | 个人本地覆盖，从 `.env.development.local.example` 复制 |
 
-**本地环境隔离**：想让接口指向自己电脑上的后端，复制 `.env.local.example` 为 `.env.local`
-再改 `VITE_PROXY_TARGET` 即可。这个文件已被 gitignore，不会影响同事。
+**本地环境隔离**：vite 的加载顺序是 `.env` → `.env.local` → `.env.<mode>` → `.env.<mode>.local`，
+**后面的覆盖前面的**。所以个人覆盖必须用 `.env.<mode>.local`（开发环境即 `.env.development.local`），
+写进 `.env.local` 会被 `.env.development` 压掉、不生效。
+
+小程序联调是本机覆盖的典型场景 —— 小程序不走 vite 代理，必须写后端绝对地址：
+
+```
+VITE_API_BASE_URL=http://127.0.0.1:8080
+VITE_USE_MOCK=false
+```
+
+这个文件已被 gitignore 忽略，不会影响同事。示例见 `.env.development.local.example`。
 
 新增变量时记得同步在 `src/env.d.ts` 里补类型声明。
 只有 `VITE_` 前缀的变量才会暴露给客户端代码。
