@@ -34,7 +34,7 @@
     <!-- 已登录 -->
     <view v-else class="mine paper-content">
       <!-- 个人主页：点头像或昵称进编辑资料 -->
-      <view class="profile" @click="go('/pages-sub/user/profile-edit')">
+      <view class="profile" @click="go('/pages-sub/user/home')">
         <view class="avatar">
           <image v-if="avatar" class="avatar__img" :src="avatar" mode="aspectFill" />
           <text v-else class="avatar__letter">{{ avatarLetter }}</text>

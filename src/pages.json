@@ -1,4 +1,4 @@
-﻿{
+{
   "easycom": {
     "autoscan": true,
     "custom": {
@@ -99,6 +99,12 @@
           "path": "study/shelf",
           "style": {
             "navigationBarTitleText": "我的书架"
+          }
+        },
+        {
+          "path": "user/home",
+          "style": {
+            "navigationBarTitleText": "个人主页"
           }
         },
         {
