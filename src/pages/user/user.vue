@@ -19,7 +19,7 @@
       <view class="deco__note"></view>
     </view>
 
-    <!-- 未登录 -->
+    <!-- 未登录：登录入口就放在这一页，不单独占 tab -->
     <view v-if="!isLogged" class="mine paper-content">
       <view class="guest">
         <view class="guest__mark">
@@ -33,7 +33,8 @@
 
     <!-- 已登录 -->
     <view v-else class="mine paper-content">
-      <view class="profile">
+      <!-- 个人主页：点头像或昵称进编辑资料 -->
+      <view class="profile" @click="go('/pages-sub/user/profile-edit')">
         <view class="avatar">
           <image v-if="avatar" class="avatar__img" :src="avatar" mode="aspectFill" />
           <text v-else class="avatar__letter">{{ avatarLetter }}</text>
@@ -41,6 +42,18 @@
         <view class="profile__text">
           <text class="profile__name">{{ nickname }}</text>
           <text class="profile__account">账号：{{ account }}</text>
+        </view>
+        <text class="profile__arrow">›</text>
+      </view>
+
+      <view class="section">
+        <text class="section__title">我的内容</text>
+        <!-- 数字要等接口接入，先不编造，用「—」表示暂无数据 -->
+        <view class="board">
+          <view v-for="item in board" :key="item.label" class="board__item" @click="go(item.url)">
+            <text class="board__value">—</text>
+            <text class="board__label">{{ item.label }}</text>
+          </view>
         </view>
       </view>
 
@@ -72,7 +85,20 @@
         </view>
       </view>
 
-      <!-- 以后加「我的课程 / 收藏 / 设置」之类的入口，照这个 section 往下复制即可 -->
+      <view class="section">
+        <text class="section__title">设置与管理</text>
+
+        <view
+          v-for="(item, index) in settings"
+          :key="item.label"
+          class="row row--link"
+          :class="{ 'row--last': index === settings.length - 1 }"
+          @click="go(item.url)"
+        >
+          <text class="row__text">{{ item.label }}</text>
+          <text class="row__arrow">›</text>
+        </view>
+      </view>
 
       <button class="btn btn--ghost" @click="onLogout">退出登录</button>
     </view>
@@ -83,6 +109,11 @@
 import { computed } from 'vue'
 import { useUserStore } from '@/store/modules/user'
 
+interface Entry {
+  label: string
+  url: string
+}
+
 const userStore = useUserStore()
 
 const isLogged = computed(() => userStore.isLogged)
@@ -92,6 +123,24 @@ const phone = computed(() => userStore.userInfo?.phonenumber || '')
 const email = computed(() => userStore.userInfo?.email || '')
 const avatar = computed(() => userStore.userInfo?.avatar || '')
 const avatarLetter = computed(() => nickname.value.slice(0, 1).toUpperCase())
+
+/** 数据看板：具体数字等接口接入，这里先只放入口 */
+const board: Entry[] = [
+  { label: '我的帖子', url: '/pages-sub/user/my-content' },
+  { label: '我的点赞', url: '/pages-sub/user/my-content' },
+  { label: '我的粉丝与关注', url: '/pages-sub/user/my-content' }
+]
+
+const settings: Entry[] = [
+  { label: '编辑资料', url: '/pages-sub/user/profile-edit' },
+  { label: '账号安全', url: '/pages-sub/user/security' },
+  { label: '通知设置', url: '/pages-sub/user/notice' },
+  { label: '意见反馈', url: '/pages-sub/user/feedback' }
+]
+
+function go(url: string): void {
+  uni.navigateTo({ url })
+}
 
 function goLogin(): void {
   uni.navigateTo({ url: '/pages-sub/auth/login' })
@@ -184,6 +233,13 @@ function onLogout(): void {
     font-size: 26rpx;
     color: $warm-gray;
   }
+
+  &__arrow {
+    flex-shrink: 0;
+    margin-left: 16rpx;
+    font-size: 40rpx;
+    color: rgba(138, 129, 124, 0.7);
+  }
 }
 
 .avatar {
@@ -219,6 +275,32 @@ function onLogout(): void {
   }
 }
 
+/* 数据看板：三格入口 */
+.board {
+  display: flex;
+  padding: 36rpx 0 32rpx;
+  border-bottom: 2rpx solid rgba(24, 58, 55, 0.1);
+
+  &__item {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__value {
+    font-size: 40rpx;
+    font-weight: 600;
+    color: rgba(138, 129, 124, 0.5);
+  }
+
+  &__label {
+    margin-top: 10rpx;
+    font-size: 24rpx;
+    color: $warm-gray;
+  }
+}
+
 /* 信息行用下划线分隔，和登录页的下划线输入是同一套语言 */
 .row {
   display: flex;
@@ -231,11 +313,25 @@ function onLogout(): void {
     border-bottom: none;
   }
 
+  &--link {
+    padding: 34rpx 0;
+  }
+
   &__label {
     flex-shrink: 0;
     margin-right: 24rpx;
     font-size: 30rpx;
     color: $warm-gray;
+  }
+
+  &__text {
+    font-size: 30rpx;
+    color: $ink;
+  }
+
+  &__arrow {
+    font-size: 34rpx;
+    color: rgba(138, 129, 124, 0.7);
   }
 
   &__value {

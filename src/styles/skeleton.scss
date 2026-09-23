@@ -1,0 +1,44 @@
+﻿/* 骨架占位样式。
+ *
+ * 页面结构已就绪、内容还没接入时用它，明确表达"待实现"，
+ * 不要往里填编造的假数据（正文、昵称、数量都不能编）。
+ */
+
+@import './book-theme.scss';
+
+/* 占位块 */
+.ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24rpx;
+  background-color: rgba(255, 252, 246, 0.55);
+  border: 2rpx dashed rgba(24, 58, 55, 0.16);
+  border-radius: 12rpx;
+}
+
+.ph__text {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: rgba(138, 129, 124, 0.9);
+  text-align: center;
+}
+
+/* 区块标题 + 右侧"更多" */
+.sec {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 44rpx 0 20rpx;
+}
+
+.sec__title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: $ink;
+}
+
+.sec__more {
+  font-size: 24rpx;
+  color: $warm-gray;
+}
