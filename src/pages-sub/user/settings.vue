@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <view class="paper-page">
     <view class="deco">
       <view class="deco__glow"></view>
@@ -55,6 +55,11 @@ function onLogout(): void {
       if (!res.confirm) return
       userStore.logout()
       uni.showToast({ title: '已退出登录', icon: 'none' })
+      // 退出后直接回登录页。用 reLaunch 而不是 navigateTo：
+      // 它会把页面栈清空，避免用户还能返回到已登录的页面。
+      setTimeout(() => {
+        uni.reLaunch({ url: '/pages-sub/auth/login' })
+      }, 600)
     }
   })
 }
