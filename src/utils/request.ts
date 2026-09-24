@@ -106,10 +106,31 @@ function normalizeError(err: unknown): RequestError {
   return new RequestError('网络异常，请稍后重试', -1, err)
 }
 
+/**
+ * 401 只处理一次。
+ * 一个页面常常并发好几个请求，token 过期时会一起失败，
+ * 没有这个锁会连弹多次提示、连跳多次登录页。
+ */
+let handlingUnauthorized = false
+
 function handleUnauthorized(): void {
   clearToken()
+
+  if (handlingUnauthorized) return
+  handlingUnauthorized = true
+
   uni.showToast({ title: '登录状态已过期，请重新登录', icon: 'none' })
-  // TODO: 项目接入登录页后，在这里 reLaunch 到登录页
+
+  // 清掉页面栈直接回登录页，避免用户停在需要登录的页面上点什么都没反应
+  setTimeout(() => {
+    uni.reLaunch({
+      url: '/pages-sub/auth/login',
+      // 跳转结束后解锁，之后新的 401 还能正常处理
+      complete: () => {
+        handlingUnauthorized = false
+      }
+    })
+  }, 600)
 }
 
 export async function request<T = unknown>(config: RequestConfig): Promise<T> {
