@@ -19,15 +19,10 @@
       }
     },
     {
-      "path": "pages/study/study",
-      "style": {
-        "navigationBarTitleText": "学习"
-      }
-    },
-    {
       "path": "pages/user/user",
       "style": {
-        "navigationBarTitleText": "我的"
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom"
       }
     }
   ],
@@ -102,9 +97,9 @@
           }
         },
         {
-          "path": "user/home",
+          "path": "user/settings",
           "style": {
-            "navigationBarTitleText": "个人主页"
+            "navigationBarTitleText": "设置"
           }
         },
         {
@@ -159,10 +154,6 @@
       {
         "pagePath": "pages/community/community",
         "text": "社区"
-      },
-      {
-        "pagePath": "pages/study/study",
-        "text": "学习"
       },
       {
         "pagePath": "pages/user/user",
