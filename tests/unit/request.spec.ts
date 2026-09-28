@@ -130,6 +130,11 @@ describe('request loading 计数', () => {
 
     expect(uniMock.showLoading).toHaveBeenCalledTimes(1)
 
+    // request() 会先过一遍模拟层（异步），uni.request 要到下一个微任务之后才被调用，
+    // 所以这里先等一拍，resolvers 才是满的
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(resolvers).toHaveLength(2)
+
     resolvers.forEach((resolve) => resolve())
     await Promise.all([first, second])
 

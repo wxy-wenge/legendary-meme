@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 「我的」页内 Tab 的定位。
  *
  * uni.switchTab 的 url **不支持 query**（微信端的限制），
@@ -11,10 +11,10 @@ export const MINE_TAB_KEY = 'mine_tab_target'
 
 /** 页内 Tab 下标，顺序必须和 pages/user/user.vue 里的 tabs 一致 */
 export const MINE_TAB = {
-  intro: 0,
-  history: 1,
-  favorite: 2,
-  shelf: 3
+  history: 0,
+  favorite: 1,
+  shelf: 2,
+  posts: 3
 } as const
 
 /** 跳到「我的」并自动切到指定的页内 Tab */

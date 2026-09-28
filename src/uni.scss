@@ -1,10 +1,10 @@
-/**
+﻿/**
  * uni.scss 会被自动注入到每一个 <style lang="scss"> 中，
  * 因此这里只放变量 / mixin，不要写会产出 CSS 的规则。
  */
 
 /* 主题色 */
-$uni-color-primary: #007aff;
+$uni-color-primary: #2563eb;
 $uni-color-success: #4cd964;
 $uni-color-warning: #f0ad4e;
 $uni-color-error: #dd524d;
@@ -18,7 +18,7 @@ $uni-text-color-disable: #c0c0c0;
 
 /* 背景 */
 $uni-bg-color: #ffffff;
-$uni-bg-color-grey: #f5f6f8;
+$uni-bg-color-grey: #f5f7fb;
 $uni-bg-color-hover: #f1f1f1;
 $uni-bg-color-mask: rgba(0, 0, 0, 0.4);
 

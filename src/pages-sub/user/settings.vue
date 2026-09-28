@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <view class="paper-page">
     <view class="deco">
       <view class="deco__glow"></view>
@@ -75,8 +75,8 @@ function onLogout(): void {
 
 .group {
   padding: 0 28rpx;
-  background-color: rgba(255, 252, 246, 0.9);
-  border: 2rpx solid rgba(24, 58, 55, 0.08);
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2rpx solid rgba(31, 41, 55, 0.08);
   border-radius: 20rpx;
 }
 
@@ -85,7 +85,7 @@ function onLogout(): void {
   align-items: center;
   justify-content: space-between;
   padding: 34rpx 0;
-  border-bottom: 2rpx solid rgba(24, 58, 55, 0.1);
+  border-bottom: 2rpx solid rgba(31, 41, 55, 0.1);
 }
 
 .row--last {
@@ -94,12 +94,12 @@ function onLogout(): void {
 
 .row__text {
   font-size: 30rpx;
-  color: $ink;
+  color: $text;
 }
 
 .row__arrow {
   font-size: 34rpx;
-  color: rgba(138, 129, 124, 0.7);
+  color: rgba(107, 114, 128, 0.7);
 }
 
 .btn {
@@ -107,9 +107,9 @@ function onLogout(): void {
   margin-top: 64rpx;
   font-size: 30rpx;
   letter-spacing: 4rpx;
-  color: $ink;
+  color: $text;
   background-color: transparent;
-  border: 2rpx solid rgba(24, 58, 55, 0.28);
+  border: 2rpx solid rgba(31, 41, 55, 0.28);
   border-radius: 6rpx;
 }
 

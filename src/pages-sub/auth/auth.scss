@@ -1,7 +1,7 @@
 /* 登录 / 注册页的布局样式。
- * 配色、纸面、背景装饰都在 src/styles/book-theme.scss 里，这里只管版面。
+ * 配色在 src/styles/book-theme.scss 里，这里只管版面。
  *
- * 表单不用居中大白卡片，改成下划线式输入，直接落在纸面上，留白干净。
+ * 表单是白底圆角输入框，落在浅色页面上，靠留白和卡片层次分区。
  */
 
 @import '../../styles/book-theme.scss';
@@ -15,21 +15,21 @@
     margin-bottom: 64rpx;
   }
 
-  /* 品牌标记用 16rpx 圆角，跟按钮(6rpx)、验证码(8rpx)、卡片(12rpx)都不一样 */
+  /* 品牌标记圆角跟卡片一致，跟按钮(胶囊)、输入框(16rpx)区分开 */
   &__mark {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 76rpx;
     height: 76rpx;
-    background-color: $ink;
-    border-radius: 16rpx;
+    background-color: $primary;
+    border-radius: 24rpx;
   }
 
   &__glyph {
     font-size: 38rpx;
     font-weight: 600;
-    color: $paper;
+    color: #ffffff;
   }
 
   &__brand-text {
@@ -37,7 +37,7 @@
     font-size: 30rpx;
     font-weight: 600;
     letter-spacing: 2rpx;
-    color: $ink;
+    color: $text;
   }
 
   &__title {
@@ -45,7 +45,7 @@
     font-size: 54rpx;
     font-weight: 600;
     letter-spacing: 2rpx;
-    color: $ink;
+    color: $text;
   }
 
   &__sub {
@@ -53,7 +53,7 @@
     margin-top: 16rpx;
     font-size: 26rpx;
     letter-spacing: 1rpx;
-    color: $warm-gray;
+    color: $text-2;
   }
 
   &__foot {
@@ -65,13 +65,13 @@
   }
 
   &__foot-text {
-    color: $warm-gray;
+    color: $text-2;
   }
 
   &__foot-link {
     margin-left: 8rpx;
     font-weight: 500;
-    color: $coral;
+    color: $primary;
   }
 }
 
@@ -82,30 +82,33 @@
 }
 
 .field {
-  margin-bottom: 44rpx;
+  margin-bottom: 36rpx;
 
   &__label {
     display: block;
     margin-bottom: 16rpx;
     font-size: 26rpx;
     letter-spacing: 1rpx;
-    color: $warm-gray;
+    color: $text-2;
   }
 
-  /* 底部对齐，让验证码框和输入下划线齐平 */
+  /* 验证码那一行：输入框和验证码块等高，居中对齐 */
   &__row {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
   }
 
+  /* 白底圆角输入框 + 浅边框 */
   &__input {
+    box-sizing: border-box;
     width: 100%;
-    height: 76rpx;
-    padding: 0;
-    background-color: transparent;
-    border-bottom: 2rpx solid rgba(24, 58, 55, 0.22);
-    font-size: 32rpx;
-    color: $ink;
+    height: 88rpx;
+    padding: 0 24rpx;
+    font-size: 30rpx;
+    color: $text;
+    background-color: $card;
+    border: 2rpx solid #e5e7eb;
+    border-radius: 16rpx;
   }
 
   &__input--code {
@@ -114,20 +117,22 @@
   }
 
   &__ph {
-    color: rgba(138, 129, 124, 0.6);
+    color: $text-3;
   }
 }
 
+/* 验证码块：跟输入框同一套外观，点一下换一张 */
 .captcha {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 200rpx;
-  height: 74rpx;
-  margin-left: 28rpx;
-  background-color: rgba(255, 107, 74, 0.08);
-  border: 2rpx solid rgba(255, 107, 74, 0.26);
-  border-radius: 8rpx;
+  height: 88rpx;
+  margin-left: 20rpx;
+  overflow: hidden;
+  background-color: $card;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 16rpx;
 
   &__img {
     width: 100%;
@@ -138,21 +143,21 @@
     font-size: 32rpx;
     font-weight: 600;
     letter-spacing: 2rpx;
-    color: $coral;
+    color: $primary;
     white-space: nowrap;
   }
 }
 
-/* 按钮圆角很小，做出「印章」的感觉，跟其他元素区分开 */
+/* 主按钮：主色实心白字，胶囊圆角 */
 .submit {
   height: 96rpx;
   margin-top: 28rpx;
   line-height: 96rpx;
   font-size: 32rpx;
   letter-spacing: 6rpx;
-  color: $paper;
-  background-color: $ink;
-  border-radius: 6rpx;
+  color: #ffffff;
+  background-color: $primary;
+  border-radius: 999rpx;
 
   &::after {
     border: none;

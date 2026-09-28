@@ -33,7 +33,7 @@
 .todo__title {
   font-size: 44rpx;
   font-weight: 600;
-  color: $ink;
+  color: $text;
 }
 
 .todo__desc {
@@ -41,7 +41,7 @@
   margin-top: 16rpx;
   font-size: 26rpx;
   line-height: 1.6;
-  color: $warm-gray;
+  color: $text-2;
 }
 
 .todo__ph {
@@ -53,6 +53,6 @@
   display: block;
   margin-top: 24rpx;
   font-size: 22rpx;
-  color: rgba(138, 129, 124, 0.7);
+  color: rgba(107, 114, 128, 0.7);
 }
 </style>

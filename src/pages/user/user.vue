@@ -47,9 +47,6 @@
 
       <view class="card">
         <text class="card__name">{{ nickname }}</text>
-        <view v-if="identity" class="card__tag">
-          <text class="card__tag-text">{{ identity }}</text>
-        </view>
       </view>
 
       <!-- 页内 Tab -->
@@ -66,16 +63,8 @@
       </view>
 
       <view class="panel">
-        <!-- 个人简介 -->
-        <view v-if="active === 0">
-          <text class="panel__label">关于我</text>
-          <text class="panel__text" :class="{ 'panel__text--empty': !intro }">
-            {{ intro || '还没有填写个人简介' }}
-          </text>
-        </view>
-
         <!-- 观看历史：二级 [视频|书籍] + 三级 [未看完|已看完] -->
-        <view v-else-if="active === 1">
+        <view v-if="active === 0">
           <view class="seg">
             <text
               v-for="(item, index) in historyKinds"
@@ -118,7 +107,7 @@
         </view>
 
         <!-- 我的收藏：收藏的视频 -->
-        <view v-else-if="active === 2">
+        <view v-else-if="active === 1">
           <view v-if="!favoriteVideos.length" class="panel__empty">
             <text class="panel__empty-text">还没有收藏任何视频</text>
           </view>
@@ -136,7 +125,7 @@
         </view>
 
         <!-- 我的书架：两列网格 -->
-        <view v-else>
+        <view v-else-if="active === 2">
           <view v-if="!shelfBooks.length" class="panel__empty">
             <text class="panel__empty-text">书架还是空的</text>
           </view>
@@ -150,6 +139,31 @@
             </view>
           </view>
         </view>
+
+        <!-- 我的帖子 -->
+        <view v-else>
+          <view v-if="!myPosts.length" class="panel__empty">
+            <text class="panel__empty-text">还没有发布过帖子</text>
+          </view>
+
+          <view v-else class="myposts">
+            <view
+              v-for="item in myPosts"
+              :key="item.id"
+              class="mypost"
+              @click="goPostDetail(item.id)"
+            >
+              <text class="mypost__summary">{{ item.summary }}</text>
+
+              <view class="mypost__foot">
+                <text class="mypost__time">{{ item.createTime }}</text>
+                <text class="mypost__stat">
+                  ♡ {{ item.likeCount }} · 评论 {{ item.commentCount }}
+                </text>
+              </view>
+            </view>
+          </view>
+        </view>
       </view>
     </view>
   </view>
@@ -158,23 +172,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
+import { communityApi } from '@/api/modules/community'
+import { learningApi } from '@/api/modules/learning'
 import { useUserStore } from '@/store/modules/user'
 import { MINE_TAB_KEY } from '@/utils/mine-tab'
-
-interface HistoryItem {
-  id: number
-  /** 0 视频 / 1 书籍，对应 historyKinds 的下标 */
-  kind: 0 | 1
-  title: string
-  done: boolean
-  /** 未看完时显示；已看完留空（已看完不显示进度） */
-  progress: string
-}
-
-interface CoverItem {
-  id: number
-  title: string
-}
+import type { CoverItem, LearnHistoryItem, PostItem } from '@/api/types'
 
 const userStore = useUserStore()
 
@@ -185,13 +187,9 @@ const nickname = computed(() => userStore.userInfo?.nickName || '未命名')
 const avatar = computed(() => userStore.userInfo?.avatar || '')
 const avatarLetter = computed(() => nickname.value.slice(0, 1).toUpperCase())
 
-/** 简介与身份标签：后端 sys_user 还没有对应字段，先把位置留出来 */
-const intro = ref('')
-const identity = ref('')
-
 /* ---------- 页内 Tab ---------- */
 
-const tabs = ['个人简介', '观看历史', '我的收藏', '我的书架']
+const tabs = ['观看历史', '我的收藏', '我的书架', '我的帖子']
 const active = ref(0)
 
 /* ---------- 观看历史 ---------- */
@@ -201,55 +199,62 @@ const historyStates = ['未看完', '已看完']
 const historyKind = ref(0)
 const historyState = ref(0)
 
-/** 静态演示数据，接口就绪后整体换成接口返回 */
-const historyData: HistoryItem[] = [
-  {
-    id: 1,
-    kind: 0,
-    title: 'Vue3 组合式 API 实战',
-    done: false,
-    progress: '上次观看至第 3 节 进度 45%'
-  },
-  {
-    id: 2,
-    kind: 0,
-    title: '小程序分包与性能优化',
-    done: false,
-    progress: '上次观看至第 7 节 进度 80%'
-  },
-  { id: 3, kind: 0, title: 'TypeScript 类型基础入门', done: true, progress: '' },
-  {
-    id: 4,
-    kind: 1,
-    title: 'JavaScript 高级程序设计',
-    done: false,
-    progress: '上次看至 128 页 第 4 章'
-  },
-  { id: 5, kind: 1, title: '深入理解计算机系统', done: false, progress: '上次看至 56 页 第 2 章' },
-  { id: 6, kind: 1, title: '代码整洁之道', done: true, progress: '' }
-]
+const historyData = ref<LearnHistoryItem[]>([])
 
 const historyList = computed(() =>
-  historyData.filter(
+  historyData.value.filter(
     (item) => item.kind === historyKind.value && item.done === (historyState.value === 1)
   )
 )
 
+async function loadHistory(): Promise<void> {
+  try {
+    const res = await learningApi.history()
+    historyData.value = res.rows ?? []
+  } catch {
+    // 失败提示由 request 层统一 toast
+    historyData.value = []
+  }
+}
+
 /* ---------- 我的收藏 / 我的书架 ---------- */
 
-/** 静态演示数据，接口就绪后整体换成接口返回 */
-const favoriteVideos: CoverItem[] = [
-  { id: 1, title: 'Vue3 组合式 API 实战' },
-  { id: 2, title: '小程序分包与性能优化' },
-  { id: 3, title: 'TypeScript 类型基础入门' }
-]
+const favoriteVideos = ref<CoverItem[]>([])
+const shelfBooks = ref<CoverItem[]>([])
 
-const shelfBooks: CoverItem[] = [
-  { id: 1, title: 'JavaScript 高级程序设计' },
-  { id: 2, title: '深入理解计算机系统' },
-  { id: 3, title: '代码整洁之道' },
-  { id: 4, title: '你不知道的 JavaScript' }
-]
+async function loadFavorites(): Promise<void> {
+  try {
+    const res = await learningApi.favorites()
+    favoriteVideos.value = res.rows ?? []
+  } catch {
+    // 失败提示由 request 层统一 toast
+    favoriteVideos.value = []
+  }
+}
+
+async function loadShelf(): Promise<void> {
+  try {
+    const res = await learningApi.shelf()
+    shelfBooks.value = res.rows ?? []
+  } catch {
+    // 失败提示由 request 层统一 toast
+    shelfBooks.value = []
+  }
+}
+
+/* ---------- 我的帖子 ---------- */
+
+const myPosts = ref<PostItem[]>([])
+
+async function loadMyPosts(): Promise<void> {
+  try {
+    const res = await communityApi.myPosts()
+    myPosts.value = res.rows ?? []
+  } catch {
+    // 失败提示由 request 层统一 toast
+    myPosts.value = []
+  }
+}
 
 /* ---------- 自定义导航栏尺寸 ---------- */
 
@@ -281,9 +286,19 @@ function goLogin(): void {
   uni.navigateTo({ url: '/pages-sub/auth/login' })
 }
 
+function goPostDetail(id: number): void {
+  uni.navigateTo({ url: `/pages-sub/community/post-detail?id=${id}` })
+}
+
 /* ---------- 从「观看历史」等旧路由跳进来时定位到对应 Tab ---------- */
 
 onShow(() => {
+  // 每次回到这一页都重新拉一次，保证数据是最新的
+  void loadHistory()
+  void loadFavorites()
+  void loadShelf()
+  void loadMyPosts()
+
   const raw = uni.getStorageSync(MINE_TAB_KEY)
   if (raw === '' || raw === undefined || raw === null) return
 
@@ -304,6 +319,7 @@ onShow(() => {
   right: 0;
   left: 0;
   z-index: 20;
+  background-color: $bg;
 }
 
 .navbar__inner {
@@ -317,7 +333,7 @@ onShow(() => {
 .navbar__title {
   font-size: 34rpx;
   font-weight: 600;
-  color: $ink;
+  color: $text;
 }
 
 .navbar__btn {
@@ -331,7 +347,7 @@ onShow(() => {
 .navbar__gear {
   font-size: 40rpx;
   line-height: 1;
-  color: $ink;
+  color: $text;
 }
 
 /* ---------- 页面内容 ---------- */
@@ -349,21 +365,21 @@ onShow(() => {
   flex-direction: column;
   align-items: center;
 
-  /* 比登录页的品牌标记更大、圆角更大，跟头像(圆形)、按钮(6rpx)区分开 */
+  /* 比登录页的品牌标记更大；圆角跟卡片一致，跟头像(圆形)、按钮(胶囊)区分开 */
   &__mark {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 136rpx;
     height: 136rpx;
-    background-color: $ink;
-    border-radius: 30rpx;
+    background-color: $primary;
+    border-radius: 24rpx;
   }
 
   &__glyph {
     font-size: 64rpx;
     font-weight: 600;
-    color: $paper;
+    color: #ffffff;
   }
 
   &__title {
@@ -371,7 +387,7 @@ onShow(() => {
     font-size: 44rpx;
     font-weight: 600;
     letter-spacing: 2rpx;
-    color: $ink;
+    color: $text;
   }
 
   &__desc {
@@ -379,7 +395,7 @@ onShow(() => {
     font-size: 26rpx;
     line-height: 1.8;
     letter-spacing: 1rpx;
-    color: $warm-gray;
+    color: $text-2;
   }
 }
 
@@ -390,18 +406,18 @@ onShow(() => {
   z-index: 2;
   display: flex;
   justify-content: center;
-  padding-top: 40rpx;
+  padding-top: 20rpx;
 }
 
 .hero__avatar {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 280rpx;
-  height: 280rpx;
+  width: 160rpx;
+  height: 160rpx;
   overflow: hidden;
-  background-color: $ink;
-  border: 6rpx solid rgba(255, 252, 246, 0.9);
+  background-color: $primary;
+  border: 6rpx solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
 }
 
@@ -411,41 +427,28 @@ onShow(() => {
 }
 
 .hero__letter {
-  font-size: 96rpx;
+  font-size: 56rpx;
   font-weight: 600;
-  color: $paper;
+  color: #ffffff;
 }
 
 .card {
   position: relative;
   z-index: 1;
-  padding: 180rpx 40rpx 48rpx;
-  margin-top: -140rpx;
+  padding: 80rpx 40rpx 40rpx;
+  margin-top: -60rpx;
   text-align: center;
-  background-color: rgba(255, 252, 246, 0.94);
-  border: 2rpx solid rgba(24, 58, 55, 0.08);
-  border-radius: 28rpx;
+  background-color: $card;
+  border-radius: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(31, 41, 55, 0.06);
 }
 
 .card__name {
   display: block;
-  font-size: 48rpx;
+  font-size: 40rpx;
   font-weight: 600;
   letter-spacing: 2rpx;
-  color: $ink;
-}
-
-.card__tag {
-  display: inline-block;
-  padding: 10rpx 32rpx;
-  margin-top: 24rpx;
-  background-color: #f1efea;
-  border-radius: 999rpx;
-}
-
-.card__tag-text {
-  font-size: 26rpx;
-  color: $ink;
+  color: $text;
 }
 
 /* ---------- 页内 Tab ---------- */
@@ -453,52 +456,34 @@ onShow(() => {
 .tabs {
   display: flex;
   align-items: center;
-  margin-top: 44rpx;
+  margin-top: 32rpx;
 }
 
 .tabs__item {
+  flex: 1;
   padding-bottom: 12rpx;
-  margin-right: 44rpx;
+  text-align: center;
   border-bottom: 6rpx solid transparent;
 }
 
 .tabs__item--on {
-  border-bottom-color: $coral;
+  border-bottom-color: $primary;
 }
 
 .tabs__text {
   font-size: 28rpx;
-  color: $warm-gray;
+  color: $text-2;
 }
 
 .tabs__item--on .tabs__text {
   font-weight: 600;
-  color: $ink;
+  color: $text;
 }
 
 /* ---------- 面板 ---------- */
 
 .panel {
   margin-top: 40rpx;
-}
-
-.panel__label {
-  display: block;
-  font-size: 30rpx;
-  font-weight: 600;
-  color: $ink;
-}
-
-.panel__text {
-  display: block;
-  margin-top: 18rpx;
-  font-size: 28rpx;
-  line-height: 1.9;
-  color: $warm-gray;
-}
-
-.panel__text--empty {
-  color: rgba(138, 129, 124, 0.7);
 }
 
 .panel__empty {
@@ -508,7 +493,44 @@ onShow(() => {
 
 .panel__empty-text {
   font-size: 26rpx;
-  color: $warm-gray;
+  color: $text-2;
+}
+
+/* ---------- 我的帖子 ---------- */
+
+.myposts {
+  margin-top: 28rpx;
+}
+
+.mypost {
+  padding: 20rpx 24rpx;
+  margin-bottom: 16rpx;
+  background-color: $card;
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(31, 41, 55, 0.06);
+}
+
+.mypost__summary {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: $text;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.mypost__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14rpx;
+}
+
+.mypost__time,
+.mypost__stat {
+  font-size: 22rpx;
+  color: $text-3;
 }
 
 /* ---------- 二级 / 三级分段 ---------- */
@@ -526,16 +548,14 @@ onShow(() => {
   padding: 8rpx 24rpx;
   margin-right: 16rpx;
   font-size: 26rpx;
-  color: $warm-gray;
-  background-color: rgba(255, 252, 246, 0.8);
-  border: 2rpx solid rgba(24, 58, 55, 0.1);
+  color: $text-2;
+  background-color: $card;
   border-radius: 999rpx;
 }
 
 .seg__item--on {
-  color: #fffcf6;
-  background-color: $ink;
-  border-color: $ink;
+  color: #ffffff;
+  background-color: $primary;
 }
 
 /* ---------- 列表条目 ---------- */
@@ -548,9 +568,9 @@ onShow(() => {
   display: flex;
   padding: 20rpx;
   margin-bottom: 20rpx;
-  background-color: rgba(255, 252, 246, 0.9);
-  border: 2rpx solid rgba(24, 58, 55, 0.08);
+  background-color: $card;
   border-radius: 16rpx;
+  box-shadow: 0 8rpx 24rpx rgba(31, 41, 55, 0.06);
 }
 
 .item__cover {
@@ -560,13 +580,13 @@ onShow(() => {
   justify-content: center;
   width: 160rpx;
   height: 110rpx;
-  background-color: rgba(24, 58, 55, 0.05);
+  background-color: #eef2f7;
   border-radius: 10rpx;
 }
 
 .item__badge {
   font-size: 24rpx;
-  color: $warm-gray;
+  color: $text-2;
 }
 
 .item__body {
@@ -584,7 +604,7 @@ onShow(() => {
   font-size: 28rpx;
   font-weight: 600;
   line-height: 1.5;
-  color: $ink;
+  color: $text;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -593,7 +613,7 @@ onShow(() => {
   display: block;
   margin-top: 10rpx;
   font-size: 24rpx;
-  color: $warm-gray;
+  color: $text-2;
 }
 
 /* ---------- 书架两列网格 ---------- */
@@ -616,14 +636,13 @@ onShow(() => {
   justify-content: center;
   width: 100%;
   height: 240rpx;
-  background-color: rgba(24, 58, 55, 0.05);
-  border: 2rpx solid rgba(24, 58, 55, 0.08);
+  background-color: #eef2f7;
   border-radius: 12rpx;
 }
 
 .grid__badge {
   font-size: 40rpx;
-  color: rgba(24, 58, 55, 0.28);
+  color: $text-3;
 }
 
 .grid__title {
@@ -632,7 +651,7 @@ onShow(() => {
   margin-top: 14rpx;
   font-size: 26rpx;
   line-height: 1.5;
-  color: $ink;
+  color: $text;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -644,7 +663,7 @@ onShow(() => {
   line-height: 96rpx;
   font-size: 30rpx;
   letter-spacing: 4rpx;
-  border-radius: 6rpx;
+  border-radius: 999rpx;
 
   &::after {
     border: none;
@@ -653,8 +672,8 @@ onShow(() => {
   &--primary {
     width: 440rpx;
     margin-top: 76rpx;
-    color: $paper;
-    background-color: $ink;
+    color: #ffffff;
+    background-color: $primary;
   }
 }
 </style>

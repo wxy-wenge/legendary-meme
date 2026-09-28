@@ -9,7 +9,9 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "首页"
+        "navigationBarTitleText": "首页",
+        "navigationStyle": "custom",
+        "backgroundColor": "#F5F7FB"
       }
     },
     {
@@ -51,7 +53,9 @@
         {
           "path": "content/detail",
           "style": {
-            "navigationBarTitleText": "详情"
+            "navigationBarTitleText": "详情",
+            "navigationStyle": "custom",
+            "backgroundColor": "#F5F7FB"
           }
         },
         {
@@ -138,13 +142,13 @@
   "globalStyle": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "学习平台",
-    "navigationBarBackgroundColor": "#F7F1E8",
-    "backgroundColor": "#F7F1E8"
+    "navigationBarBackgroundColor": "#F5F7FB",
+    "backgroundColor": "#F5F7FB"
   },
   "tabBar": {
-    "color": "#8A817C",
-    "selectedColor": "#183A37",
-    "backgroundColor": "#FFFCF6",
+    "color": "#6B7280",
+    "selectedColor": "#2563EB",
+    "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
       {

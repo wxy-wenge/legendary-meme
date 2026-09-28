@@ -6,7 +6,7 @@
   "versionCode": "100",
   "transformPx": false,
   "mp-weixin": {
-    "appid": "",
+    "appid": "wxbb8862d1bde16fbd",
     "setting": {
       "urlCheck": false,
       "es6": true,
@@ -36,5 +36,13 @@
   "uniStatistics": {
     "enable": false
   },
-  "vueVersion": "3"
+  "vueVersion": "3",
+  "app-plus": {
+    "modules": {},
+    "distribute": {
+      "sdkConfigs": {
+        "statics": {}
+      }
+    }
+  }
 }

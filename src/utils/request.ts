@@ -162,8 +162,8 @@ export async function request<T = unknown>(config: RequestConfig): Promise<T> {
     const fullUrl = buildUrl(url)
 
     // 模拟层：后端接口就绪前，用它把前端流程跑通（见 src/api/mock.ts）。
-    // 没命中就返回 null，继续走真实请求。
-    const mocked = USE_MOCK ? await mockRequest({ url: fullUrl, method, data }) : null
+    // 关掉 USE_MOCK 时它只兜底后端还没实现的接口，其余返回 null 继续走真实请求。
+    const mocked = await mockRequest({ url: fullUrl, method, data, useMock: USE_MOCK })
 
     const res: UniRequestSuccess = mocked
       ? (mocked as unknown as UniRequestSuccess)

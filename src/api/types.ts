@@ -62,6 +62,180 @@ export interface UserInfoResult {
   permissions: string[]
 }
 
+// ---------- 业务：内容（课程 / 视频 / 文章） ----------
+
+/** 内容形态 */
+export type ContentType = 'article' | 'video'
+
+/** 列表和卡片用的一条课程 */
+export interface CourseItem {
+  id: number
+  title: string
+  type: ContentType
+  /** 分类，用于首页标签筛选和搜索匹配 */
+  category: string
+  /** 封面占位用的 emoji */
+  emoji: string
+  /** 封面渐变，形如 linear-gradient(135deg, #818CF8 0%, #A78BFA 100%) */
+  cover: string
+  /** 满星数量 1~5 */
+  stars: number
+  /** 评分，形如 4.9 */
+  score: string
+  /** 学习人数，形如 12.3k */
+  learners: string
+}
+
+/** 首页轮播位 */
+export interface BannerItem {
+  id: number
+  title: string
+  sub: string
+  /** 背景渐变 */
+  bg: string
+}
+
+/** 目录里的一节课 */
+export interface CourseLesson {
+  title: string
+  time: string
+}
+
+/** 目录里的一章 */
+export interface CourseChapter {
+  title: string
+  duration: string
+  lessons: CourseLesson[]
+}
+
+/** 评分分布的一行 */
+export interface ScoreDistRow {
+  star: number
+  percent: number
+}
+
+/** 一条课程评价 */
+export interface CourseReview {
+  name: string
+  stars: number
+  time: string
+  content: string
+}
+
+/** 课程详情（GET /content/detail） */
+export interface CourseDetail extends CourseItem {
+  /** 讲师 / 作者 */
+  author: string
+  /** 副标题，形如「视频课 · 共 3 章」 */
+  subtitle: string
+  /** 课程介绍 */
+  intro: string
+  /** 你将学到 */
+  outcomes: string[]
+  chapters: CourseChapter[]
+  distribution: ScoreDistRow[]
+  reviews: CourseReview[]
+}
+
+/** 课程列表查询参数 */
+export interface CourseQuery {
+  /** 分类；空或「推荐」表示不筛 */
+  category?: string
+  pageNum?: number
+  pageSize?: number
+}
+
+// ---------- 业务：社区（帖子 / 评论） ----------
+
+/** 帖子作者 */
+export interface PostAuthor {
+  userId: number
+  nickName: string
+  avatar?: string
+}
+
+/** 帖子里的图片 / 视频 */
+export interface PostMedia {
+  type: 'image' | 'video'
+  /** 资源地址 */
+  url: string
+  /** 视频封面 */
+  cover?: string
+}
+
+/** 一条评论。replies 是楼中楼，只支持一层 */
+export interface PostComment {
+  id: number
+  author: PostAuthor
+  content: string
+  createTime: string
+  likeCount: number
+  replies?: PostComment[]
+}
+
+/** 帖子详情（GET /community/post/detail） */
+export interface PostDetail {
+  id: number
+  author: PostAuthor
+  content: string
+  /** 话题标签，不带 # */
+  topic?: string
+  media: PostMedia[]
+  createTime: string
+  likeCount: number
+  commentCount: number
+  /** 当前用户是否已点赞 */
+  liked: boolean
+  /** 当前用户是否已收藏 */
+  favorited: boolean
+}
+
+/** 帖子列表里的一条（GET /community/post/list） */
+export interface PostItem {
+  id: number
+  author: PostAuthor
+  /** 正文摘要，列表里最多显示两行 */
+  summary: string
+  /** 话题标签，不带 # */
+  topic?: string
+  /** 配图地址，列表里最多显示三张 */
+  images: string[]
+  createTime: string
+  likeCount: number
+  commentCount: number
+}
+
+/** 发帖参数（POST /community/post/create） */
+export interface PostCreateParams {
+  content: string
+  /** 话题标签，不带 #，可为空 */
+  topic?: string
+  /** 图片地址。真实流程要先把本地文件传到后端拿到 URL 再传进来 */
+  images: string[]
+  /** 关联的课程 id，可为空 */
+  relatedId?: number
+}
+
+// ---------- 业务：学习记录（「我的」页） ----------
+
+/** 观看 / 阅读历史的一条 */
+export interface LearnHistoryItem {
+  id: number
+  /** 0 视频 / 1 书籍，对应页面上二级筛选的下标 */
+  kind: 0 | 1
+  title: string
+  /** 是否已看完；已看完不显示进度 */
+  done: boolean
+  /** 未看完时的进度文案，已看完为空字符串 */
+  progress: string
+}
+
+/** 收藏 / 书架用的简单条目 */
+export interface CoverItem {
+  id: number
+  title: string
+}
+
 // ---------- 通用 ----------
 
 /** 若依列表接口统一返回：rows（当前页数据）+ total（总数），均在响应顶层 */

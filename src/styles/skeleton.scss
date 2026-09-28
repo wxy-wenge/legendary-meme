@@ -12,15 +12,15 @@
   align-items: center;
   justify-content: center;
   padding: 0 24rpx;
-  background-color: rgba(255, 252, 246, 0.55);
-  border: 2rpx dashed rgba(24, 58, 55, 0.16);
+  background-color: rgba(255, 255, 255, 0.55);
+  border: 2rpx dashed rgba(31, 41, 55, 0.16);
   border-radius: 12rpx;
 }
 
 .ph__text {
   font-size: 24rpx;
   line-height: 1.6;
-  color: rgba(138, 129, 124, 0.9);
+  color: rgba(107, 114, 128, 0.9);
   text-align: center;
 }
 
@@ -35,10 +35,10 @@
 .sec__title {
   font-size: 34rpx;
   font-weight: 600;
-  color: $ink;
+  color: $text;
 }
 
 .sec__more {
   font-size: 24rpx;
-  color: $warm-gray;
+  color: $text-2;
 }
