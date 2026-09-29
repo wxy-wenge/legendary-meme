@@ -47,7 +47,7 @@
             class="field__input"
             placeholder="请输入账号"
             placeholder-class="field__ph"
-            :maxlength="20"
+            :maxlength="30"
           />
         </view>
 
@@ -59,7 +59,7 @@
             password
             placeholder="请输入密码"
             placeholder-class="field__ph"
-            :maxlength="20"
+            :maxlength="50"
           />
         </view>
 
@@ -69,7 +69,7 @@
             <input
               v-model="form.code"
               class="field__input field__input--code"
-              placeholder="请输入计算结果"
+              placeholder="请输入验证码"
               placeholder-class="field__ph"
               :maxlength="4"
             />

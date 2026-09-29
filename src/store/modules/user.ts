@@ -1,8 +1,8 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { userApi } from '@/api/modules/user'
-import type { LoginParams, RegisterParams, UserInfo } from '@/api/types'
-import { clearToken, getToken, setToken } from '@/utils/auth'
+import type { LoginParams, LoginResult, RegisterParams, UserInfo } from '@/api/types'
+import { clearToken, getToken, setRefreshToken, setToken } from '@/utils/auth'
 import { uniStorage } from '../persist'
 
 export const useUserStore = defineStore(
@@ -26,16 +26,45 @@ export const useUserStore = defineStore(
       userInfo.value = info
     }
 
-    /** 登录：换取 token 后拉取用户信息 / 角色 / 权限 */
-    async function login(params: LoginParams): Promise<UserInfo> {
-      const { token: nextToken } = await userApi.login(params)
-      setSession(nextToken)
-      return fetchProfile()
+    /**
+     * 登录（POST /api/user/login）。
+     *
+     * 后端的 LoginVO 里**已经带了** nickname / avatar，所以不必为了显示昵称再调一次 /getInfo；
+     * 只有 roles / permissions 得靠 /getInfo，这里顺手拉一次，失败也不阻断登录
+     * —— 新模块用的是 AppUser，不一定在若依那套角色体系里。
+     */
+    async function login(params: LoginParams): Promise<LoginResult> {
+      const res = await userApi.login(params)
+
+      setSession(res.token)
+      setRefreshToken(res.refreshToken)
+      userInfo.value = {
+        userId: res.userId,
+        userName: res.username,
+        nickName: res.nickname,
+        avatar: res.avatar
+      }
+
+      try {
+        await fetchProfile()
+      } catch {
+        // 拿不到角色 / 权限就当空的，不影响已经登录成功这件事
+        roles.value = []
+        permissions.value = []
+      }
+
+      return res
     }
 
-    /** 注册：若依的 /register。注册成功后不自动登录，由页面跳回登录页 */
+    /** 注册（POST /api/user/register）。后端要求 nickname，confirmPassword 只是前端校验用 */
     async function register(params: RegisterParams): Promise<void> {
-      await userApi.register(params)
+      await userApi.register({
+        username: params.username,
+        password: params.password,
+        nickname: params.nickname,
+        code: params.code,
+        uuid: params.uuid
+      })
     }
 
     async function fetchProfile(): Promise<UserInfo> {
@@ -46,7 +75,17 @@ export const useUserStore = defineStore(
       return info.user
     }
 
-    function logout(): void {
+    /**
+     * 退出登录。
+     * 先让后端把 token 拉进黑名单；后端不可用也必须能退出去，所以失败不阻断。
+     */
+    async function logout(): Promise<void> {
+      try {
+        await userApi.logout()
+      } catch {
+        // 忽略：本地会话一定要清干净
+      }
+
       token.value = ''
       userInfo.value = null
       roles.value = []

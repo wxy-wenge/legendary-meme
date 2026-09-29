@@ -6,7 +6,8 @@ import {
   USE_MOCK
 } from '@/config'
 import { mockRequest } from '@/api/mock'
-import { clearToken, getToken } from './auth'
+import type { RefreshTokenResult } from '@/api/types'
+import { clearToken, getRefreshToken, getToken, setToken } from './auth'
 
 export interface ApiResponse<T = unknown> {
   code: number
@@ -34,6 +35,13 @@ export interface RequestConfig {
   toast?: boolean
   /** 直接返回响应体、跳过业务 code 校验，默认 false */
   raw?: boolean
+  /** 内部用：刷新令牌后重放请求时置 true，避免 401 死循环 */
+  noRetry?: boolean
+  /**
+   * 401 时不做全局处理（不刷新令牌、不踢回登录页、不弹提示），只把错误抛出去。
+   * 给「拿不到也不算登录失效」的接口用，比如 /getInfo。
+   */
+  silent401?: boolean
 }
 
 export class RequestError extends Error {
@@ -133,6 +141,43 @@ function handleUnauthorized(): void {
   }, 600)
 }
 
+/**
+ * 用 refreshToken 换新的 accessToken。
+ *
+ * 一个页面常常并发好几个请求，token 一过期会一起 401。
+ * 没有这个单例锁会连刷好几次，还可能互相覆盖 token。
+ */
+let refreshing: Promise<boolean> | null = null
+
+function tryRefreshToken(): Promise<boolean> {
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) return Promise.resolve(false)
+
+  if (!refreshing) {
+    refreshing = send(
+      buildUrl('/api/user/refreshToken'),
+      'POST',
+      undefined,
+      { 'Content-Type': 'application/json', Authorization: `Bearer ${refreshToken}` },
+      REQUEST_TIMEOUT
+    )
+      .then((res) => {
+        const body = res.data as ApiResponse<RefreshTokenResult> | undefined
+        const next = body?.data?.accessToken
+        const ok =
+          res.statusCode >= 200 && res.statusCode < 300 && body?.code === API_SUCCESS_CODE && !!next
+        if (ok && next) setToken(next)
+        return ok
+      })
+      .catch(() => false)
+      .finally(() => {
+        refreshing = null
+      })
+  }
+
+  return refreshing
+}
+
 export async function request<T = unknown>(config: RequestConfig): Promise<T> {
   const {
     url,
@@ -143,7 +188,9 @@ export async function request<T = unknown>(config: RequestConfig): Promise<T> {
     auth = true,
     loading = false,
     toast = true,
-    raw = false
+    raw = false,
+    noRetry = false,
+    silent401 = false
   } = config
 
   const finalHeader: Record<string, string> = {
@@ -188,7 +235,15 @@ export async function request<T = unknown>(config: RequestConfig): Promise<T> {
       // 有 data 就取 data，否则返回整个响应体，由各 api 模块按需取值。
       return ('data' in result ? result.data : result) as T
     }
-    if (result.code === API_UNAUTHORIZED_CODE) handleUnauthorized()
+    if (result.code === API_UNAUTHORIZED_CODE && !silent401) {
+      // accessToken 只有 2 小时。先拿 refreshToken 换一张新的，换到就把这次请求重放一遍；
+      // 换不到（没存 refreshToken，或它也过期了）才清会话回登录页。
+      if (!noRetry && (await tryRefreshToken())) {
+        const retried = await request<T>({ ...config, noRetry: true })
+        return retried
+      }
+      handleUnauthorized()
+    }
 
     throw new RequestError(result.msg || '请求失败', result.code, result.data)
   } catch (err) {

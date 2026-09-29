@@ -1,5 +1,6 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { uniMock, type UniRequestOptions } from '../setup'
 import { useUserStore } from '@/store/modules/user'
 import { getToken, setToken } from '@/utils/auth'
 import type { UserInfo } from '@/api/types'
@@ -34,12 +35,18 @@ describe('useUserStore', () => {
     expect(getToken()).toBe('t-1')
   })
 
-  it('logout 清空内存与本地 token', () => {
+  it('logout 清空内存与本地 token（后端不可用时也必须能退出去）', async () => {
+    // 让请求直接失败：验证 logout 不会因为登出接口挂了就卡住或退不出去
+    uniMock.request.mockImplementation((options: UniRequestOptions) => {
+      options.fail?.({ errMsg: 'request:fail' })
+      return { abort: vi.fn() }
+    })
+
     const store = useUserStore()
     store.setSession('t-1')
     store.setUserInfo(demoUser)
 
-    store.logout()
+    await store.logout()
 
     expect(store.isLogged).toBe(false)
     expect(store.userInfo).toBeNull()

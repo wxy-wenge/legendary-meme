@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+﻿import { describe, expect, it } from 'vitest'
 import { mockRequest } from '@/api/mock'
 
 interface CaptchaBody {
@@ -11,7 +11,8 @@ interface CaptchaBody {
 interface ResultBody {
   code: number
   msg: string
-  token?: string
+  /** 新接口的令牌在 data 里（若依原版是顶层 token） */
+  data?: { token?: string; refreshToken?: string; accessToken?: string; nickname?: string }
 }
 
 /** 把 `3+5=?` 这样的算式解出来，顺便验证模拟层生成的算式本身是对的 */
@@ -63,21 +64,24 @@ describe('mockRequest 登录', () => {
     const { uuid, code } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/login',
+      url: '/api/user/login',
       method: 'POST',
       data: { username: 'admin', password: 'admin123', code, uuid }
     })
 
     const body = res?.data as ResultBody
     expect(body.code).toBe(200)
-    expect(body.token).toBeTruthy()
+    // 新接口把令牌放在 data 里，不是顶层
+    expect(body.data?.token).toBeTruthy()
+    expect(body.data?.refreshToken).toBeTruthy()
+    expect(body.data?.nickname).toBeTruthy()
   })
 
   it('验证码错误时失败', async () => {
     const { uuid } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/login',
+      url: '/api/user/login',
       method: 'POST',
       data: { username: 'admin', password: 'admin123', code: '9999', uuid }
     })
@@ -89,7 +93,7 @@ describe('mockRequest 登录', () => {
     const { uuid, code } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/login',
+      url: '/api/user/login',
       method: 'POST',
       data: { username: 'admin', password: 'wrong-password', code, uuid }
     })
@@ -101,10 +105,10 @@ describe('mockRequest 登录', () => {
     const { uuid, code } = await newCaptcha()
     const payload = { username: 'admin', password: 'admin123', code, uuid }
 
-    const first = await mockRequest({ url: '/api/login', method: 'POST', data: payload })
+    const first = await mockRequest({ url: '/api/user/login', method: 'POST', data: payload })
     expect((first?.data as ResultBody).code).toBe(200)
 
-    const second = await mockRequest({ url: '/api/login', method: 'POST', data: payload })
+    const second = await mockRequest({ url: '/api/user/login', method: 'POST', data: payload })
     expect((second?.data as ResultBody).code).not.toBe(200)
   })
 })
@@ -114,9 +118,16 @@ describe('mockRequest 注册', () => {
     const { uuid, code } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/register',
+      url: '/api/user/register',
       method: 'POST',
-      data: { username: 'admin', password: 'admin123', confirmPassword: 'admin123', code, uuid }
+      data: {
+        username: 'admin',
+        password: 'admin123',
+        nickname: '测试用户',
+        confirmPassword: 'admin123',
+        code,
+        uuid
+      }
     })
 
     expect((res?.data as ResultBody).code).not.toBe(200)
@@ -126,34 +137,85 @@ describe('mockRequest 注册', () => {
     const { uuid, code } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/register',
+      url: '/api/user/register',
       method: 'POST',
-      data: { username: 'newbie', password: 'abc123', confirmPassword: 'abc123', code, uuid }
+      data: {
+        username: 'newbie',
+        password: 'abc123',
+        nickname: '新来的',
+        confirmPassword: 'abc123',
+        code,
+        uuid
+      }
     })
 
     expect((res?.data as ResultBody).code).toBe(200)
   })
 
-  it('密码太短被拒绝（后端规则：5-20）', async () => {
+  it('密码太短被拒绝（后端规则：6-50）', async () => {
     const { uuid, code } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/register',
+      url: '/api/user/register',
       method: 'POST',
-      data: { username: 'shorty', password: 'abc', confirmPassword: 'abc', code, uuid }
+      data: {
+        username: 'shorty',
+        password: 'abc',
+        nickname: '短密码',
+        confirmPassword: 'abc',
+        code,
+        uuid
+      }
     })
 
     expect((res?.data as ResultBody).code).not.toBe(200)
   })
 
-  it('账号太短被拒绝（后端规则：2-20）', async () => {
+  it('账号太短被拒绝（后端规则：2-30）', async () => {
     const { uuid, code } = await newCaptcha()
 
     const res = await mockRequest({
-      url: '/api/register',
+      url: '/api/user/register',
       method: 'POST',
-      data: { username: 'a', password: 'abc123', confirmPassword: 'abc123', code, uuid }
+      data: {
+        username: 'a',
+        password: 'abc123',
+        nickname: '名字太短',
+        confirmPassword: 'abc123',
+        code,
+        uuid
+      }
     })
+
+    expect((res?.data as ResultBody).code).not.toBe(200)
+  })
+})
+
+describe('mockRequest 登出与刷新令牌', () => {
+  async function login(): Promise<void> {
+    const { uuid, code } = await newCaptcha()
+    await mockRequest({
+      url: '/api/user/login',
+      method: 'POST',
+      data: { username: 'admin', password: 'admin123', code, uuid }
+    })
+  }
+
+  it('登录后可以用 refreshToken 换到新的 accessToken', async () => {
+    await login()
+
+    const res = await mockRequest({ url: '/api/user/refreshToken', method: 'POST' })
+    const body = res?.data as ResultBody
+
+    expect(body.code).toBe(200)
+    expect(body.data?.accessToken).toBeTruthy()
+  })
+
+  it('登出后刷新令牌失效', async () => {
+    await login()
+    await mockRequest({ url: '/api/user/logout', method: 'POST' })
+
+    const res = await mockRequest({ url: '/api/user/refreshToken', method: 'POST' })
 
     expect((res?.data as ResultBody).code).not.toBe(200)
   })

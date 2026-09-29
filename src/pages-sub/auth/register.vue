@@ -45,9 +45,20 @@
           <input
             v-model="form.username"
             class="field__input"
-            placeholder="2-20 个字符"
+            placeholder="2-30 个字符"
             placeholder-class="field__ph"
-            :maxlength="20"
+            :maxlength="30"
+          />
+        </view>
+
+        <view class="field">
+          <text class="field__label">昵称</text>
+          <input
+            v-model="form.nickname"
+            class="field__input"
+            placeholder="2-30 个字符，会显示给别人看"
+            placeholder-class="field__ph"
+            :maxlength="30"
           />
         </view>
 
@@ -57,9 +68,9 @@
             v-model="form.password"
             class="field__input"
             password
-            placeholder="5-20 个字符"
+            placeholder="6-50 个字符"
             placeholder-class="field__ph"
-            :maxlength="20"
+            :maxlength="50"
           />
         </view>
 
@@ -71,7 +82,7 @@
             password
             placeholder="请再次输入密码"
             placeholder-class="field__ph"
-            :maxlength="20"
+            :maxlength="50"
           />
         </view>
 
@@ -81,7 +92,7 @@
             <input
               v-model="form.code"
               class="field__input field__input--code"
-              placeholder="请输入计算结果"
+              placeholder="请输入验证码"
               placeholder-class="field__ph"
               :maxlength="4"
             />
@@ -111,16 +122,19 @@ import { onLoad } from '@dcloudio/uni-app'
 import { userApi } from '@/api/modules/user'
 import { useUserStore } from '@/store/modules/user'
 
-/** 与后端 UserConstants 保持一致 */
+/** 与后端 learning-user 模块的校验注解保持一致 */
 const USERNAME_MIN = 2
-const USERNAME_MAX = 20
-const PASSWORD_MIN = 5
-const PASSWORD_MAX = 20
+const USERNAME_MAX = 30
+const NICKNAME_MIN = 2
+const NICKNAME_MAX = 30
+const PASSWORD_MIN = 6
+const PASSWORD_MAX = 50
 
 const userStore = useUserStore()
 
 const form = reactive({
   username: '',
+  nickname: '',
   password: '',
   confirmPassword: '',
   code: ''
@@ -158,6 +172,11 @@ function validate(): string {
   if (username.length < USERNAME_MIN || username.length > USERNAME_MAX) {
     return `账户长度必须在${USERNAME_MIN}到${USERNAME_MAX}个字符之间`
   }
+  const nickname = form.nickname.trim()
+  if (!nickname) return '请输入昵称'
+  if (nickname.length < NICKNAME_MIN || nickname.length > NICKNAME_MAX) {
+    return `昵称长度必须在${NICKNAME_MIN}到${NICKNAME_MAX}个字符之间`
+  }
   if (!form.password) return '请输入密码'
   if (form.password.length < PASSWORD_MIN || form.password.length > PASSWORD_MAX) {
     return `密码长度必须在${PASSWORD_MIN}到${PASSWORD_MAX}个字符之间`
@@ -178,6 +197,7 @@ async function onSubmit(): Promise<void> {
   try {
     await userStore.register({
       username: form.username.trim(),
+      nickname: form.nickname.trim(),
       password: form.password,
       confirmPassword: form.confirmPassword,
       code: captchaOn.value ? form.code.trim() : undefined,

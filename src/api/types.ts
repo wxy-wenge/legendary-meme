@@ -2,26 +2,33 @@
 
 // ---------- 认证 ----------
 
-/** 登录参数（若依 POST /login：用户名 + 密码 + 验证码 + uuid） */
+/**
+ * 登录参数（POST /api/user/login）。
+ * 后端 LoginDTO：username 2-30 字符、password 6-50 字符、code/uuid 均 @NotBlank。
+ */
 export interface LoginParams {
   username: string
   password: string
-  /** 验证码（后端开启验证码时必填） */
+  /** 验证码答案。后端 @NotBlank，所以后端必须开着验证码 */
   code?: string
-  /** 验证码对应的 uuid（来自 GET /captchaImage） */
+  /** 验证码标识（来自 GET /captchaImage） */
   uuid?: string
 }
 
 /**
- * 注册参数（若依 POST /register）。
- * 后端 RegisterBody 只继承 LoginBody，没有 confirmPassword 字段，
- * 所以 confirmPassword 仅用于前端校验，后端会忽略它。
+ * 注册参数（前端表单用）。
+ * 比登录多一个 nickname（后端 RegisterDTO 里是 @NotBlank，2-30 字符）；
+ * confirmPassword 只用于前端校验，后端没有这个字段。
  */
 export interface RegisterParams extends LoginParams {
+  nickname: string
   confirmPassword: string
 }
 
-/** 验证码返回（GET /captchaImage） */
+/** 真正发给后端的注册参数：后端 RegisterDTO 里没有 confirmPassword */
+export type RegisterPayload = Omit<RegisterParams, 'confirmPassword'>
+
+/** 验证码返回（GET /captchaImage）—— 沿用若依原接口，没变 */
 export interface CaptchaResult {
   /** 是否开启验证码；false 时前端隐藏验证码输入框 */
   captchaEnabled: boolean
@@ -38,9 +45,34 @@ export interface CaptchaResult {
   mockText?: string
 }
 
-/** 登录返回（POST /login，token 在响应顶层，不在 data 里） */
+/**
+ * 登录返回（后端 LoginVO）。
+ *
+ * ⚠️ 和若依原版不一样：若依把 token 放在响应**顶层**，这里在 `AjaxResult.data` 里
+ * （request 层会把 data 解出来，所以拿到手就是这个结构）。
+ */
 export interface LoginResult {
+  userId: number
+  username: string
+  /** 昵称。登录返回里就带了，不用再调 /getInfo 拿 */
+  nickname: string
+  avatar: string
+  /** 访问令牌（JWT），有效期 2 小时 */
   token: string
+  /** 刷新令牌，有效期 7 天 */
+  refreshToken: string
+}
+
+/** 注册返回（后端 RegisterVO） */
+export interface RegisterResult {
+  userId: number
+  username: string
+  msg: string
+}
+
+/** 刷新令牌返回（后端 RefreshTokenVO） */
+export interface RefreshTokenResult {
+  accessToken: string
 }
 
 /** 用户信息（GET /getInfo 返回顶层的 user 字段） */

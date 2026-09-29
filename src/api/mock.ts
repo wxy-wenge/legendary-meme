@@ -32,9 +32,11 @@ const UNAUTHORIZED = 401
 
 /** 与后端 UserConstants 保持一致 */
 const USERNAME_MIN = 2
-const USERNAME_MAX = 20
-const PASSWORD_MIN = 5
-const PASSWORD_MAX = 20
+const USERNAME_MAX = 30
+const NICKNAME_MIN = 2
+const NICKNAME_MAX = 30
+const PASSWORD_MIN = 6
+const PASSWORD_MAX = 50
 
 /**
  * 后端**还没有实现**的接口前缀：即使 VITE_USE_MOCK=false 也用演示数据兜底，
@@ -179,7 +181,35 @@ function mockLogin(raw: unknown): MockResponse {
 
   tokenSeq += 1
   currentUser = username
-  return body({ token: `mock-token-${tokenSeq}` })
+
+  // 后端 LoginVO：token 在 data 里（若依原版是顶层 token），并顺带带上昵称 / 头像
+  return body({
+    data: {
+      userId: tokenSeq,
+      username,
+      nickname: user.nickName,
+      avatar: '',
+      // 真实后端 accessToken 2 小时、refreshToken 7 天；模拟层不做过期
+      token: `mock-token-${tokenSeq}`,
+      refreshToken: `mock-refresh-${tokenSeq}`
+    }
+  })
+}
+
+/**
+ * 登出 / 刷新令牌。
+ * 模拟层拿不到请求头（mockRequest 只收到 url / method / data），
+ * 所以不校验 token 本身，只看当前有没有登录会话。
+ */
+function mockLogout(): MockResponse {
+  currentUser = null
+  return body({})
+}
+
+function mockRefreshToken(): MockResponse {
+  if (!currentUser) return error('刷新令牌已失效，请重新登录', UNAUTHORIZED)
+  tokenSeq += 1
+  return body({ data: { accessToken: `mock-token-${tokenSeq}` } })
 }
 
 function mockRegister(raw: unknown): MockResponse {
@@ -205,9 +235,14 @@ function mockRegister(raw: unknown): MockResponse {
   }
   if (users.has(username)) return error(`保存用户'${username}'失败，注册账号已存在`)
 
-  // 后端也是把昵称设成账号（SysRegisterService: setNickName(username)）
-  users.set(username, { password, nickName: username })
-  return body({})
+  // 新接口要求前端传 nickname（若依原版是后端直接拿账号当昵称）
+  const nickname = str(data, 'nickname') || username
+  if (nickname.length < NICKNAME_MIN || nickname.length > NICKNAME_MAX) {
+    return error(`昵称长度必须在${NICKNAME_MIN}到${NICKNAME_MAX}个字符之间`)
+  }
+
+  users.set(username, { password, nickName: nickname })
+  return body({ data: { userId: users.size, username, msg: '注册成功' } })
 }
 
 /**
@@ -761,10 +796,12 @@ export async function mockRequest(options: MockRequestOptions): Promise<MockResp
   // 模拟一点网络延迟，方便看清 loading 状态
   await delay(300)
 
-  // 认证
+  // 认证（C 端接口都挂在 /api/user 下）
   if (method === 'GET' && path.endsWith('/captchaImage')) return mockCaptcha()
-  if (method === 'POST' && path.endsWith('/login')) return mockLogin(options.data)
-  if (method === 'POST' && path.endsWith('/register')) return mockRegister(options.data)
+  if (method === 'POST' && path.endsWith('/api/user/login')) return mockLogin(options.data)
+  if (method === 'POST' && path.endsWith('/api/user/register')) return mockRegister(options.data)
+  if (method === 'POST' && path.endsWith('/api/user/logout')) return mockLogout()
+  if (method === 'POST' && path.endsWith('/api/user/refreshToken')) return mockRefreshToken()
   if (method === 'GET' && path.endsWith('/getInfo')) return mockGetInfo()
 
   // 内容
