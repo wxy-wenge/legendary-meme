@@ -1,5 +1,12 @@
 import { get } from '@/utils/request'
-import type { BannerItem, CourseDetail, CourseItem, CourseQuery, TableResult } from '../types'
+import type {
+  BannerItem,
+  CategoryItem,
+  CourseDetail,
+  CourseItem,
+  CourseQuery,
+  TableResult
+} from '../types'
 
 /**
  * 内容模块（课程 / 视频 / 文章）。
@@ -12,6 +19,13 @@ import type { BannerItem, CourseDetail, CourseItem, CourseQuery, TableResult } f
 export const contentApi = {
   /** 首页轮播位 */
   banners: () => get<BannerItem[]>('/content/banners'),
+
+  /**
+   * 课程分类列表（后端 learning-course 模块，免登录）。
+   * 注意路径不带 /api 前缀 —— /api/** 归 C 端那条安全链管。
+   * 返回的是 AjaxResult.data 里的数组。
+   */
+  categories: () => get<CategoryItem[]>('/course/category/list'),
 
   /** 课程列表（首页信息流，按分类） */
   courses: (params?: CourseQuery) => get<TableResult<CourseItem>>('/content/courses', params),

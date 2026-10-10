@@ -100,6 +100,17 @@ export interface UserInfoResult {
 export type ContentType = 'article' | 'video'
 
 /** 列表和卡片用的一条课程 */
+/** 课程分类（GET /course/category/list） */
+export interface CategoryItem {
+  categoryId: number
+  /** 分类名称，如「Java开发」 */
+  categoryName: string
+  /** 分类图标地址，可为空 */
+  iconUrl?: string
+  /** 排序号，越小越靠前（后端已排好，前端按原顺序显示即可） */
+  sort: number
+}
+
 export interface CourseItem {
   id: number
   title: string

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 前端模拟层
  *
  * 作用：后端接口还没就绪时顶上去，让页面走的是**正常的请求链路**，
@@ -17,6 +17,7 @@
 
 import type {
   BannerItem,
+  CategoryItem,
   CourseDetail,
   CourseItem,
   CoverItem,
@@ -291,12 +292,22 @@ const demoBanners: BannerItem[] = [
   }
 ]
 
+/** 课程分类。真数据来自后端 GET /course/category/list，这里是模拟层的兜底 */
+const demoCategories: CategoryItem[] = [
+  { categoryId: 6, categoryName: 'Java开发', sort: 1 },
+  { categoryId: 7, categoryName: 'Python编程', sort: 2 },
+  { categoryId: 8, categoryName: '大数据', sort: 3 },
+  { categoryId: 9, categoryName: '前端开发', sort: 4 },
+  { categoryId: 10, categoryName: '软件测试', sort: 5 },
+  { categoryId: 11, categoryName: '求职面试', sort: 6 }
+]
+
 const demoCourses: CourseItem[] = [
   {
     id: 1,
     title: '机器学习实战：从原理到落地',
     type: 'video',
-    category: '人工智能',
+    category: '大数据',
     emoji: '🤖',
     cover: 'linear-gradient(135deg, #818CF8 0%, #A78BFA 100%)',
     stars: 5,
@@ -307,7 +318,7 @@ const demoCourses: CourseItem[] = [
     id: 2,
     title: '数据科学入门',
     type: 'article',
-    category: '后端',
+    category: '大数据',
     emoji: '📊',
     cover: 'linear-gradient(135deg, #FBBF24 0%, #FB923C 100%)',
     stars: 5,
@@ -318,7 +329,7 @@ const demoCourses: CourseItem[] = [
     id: 3,
     title: '数据分析与可视化',
     type: 'video',
-    category: '后端',
+    category: '大数据',
     emoji: '📈',
     cover: 'linear-gradient(135deg, #22D3EE 0%, #38BDF8 100%)',
     stars: 4,
@@ -329,7 +340,7 @@ const demoCourses: CourseItem[] = [
     id: 4,
     title: 'Web 前端入门',
     type: 'video',
-    category: '前端',
+    category: '前端开发',
     emoji: '💻',
     cover: 'linear-gradient(135deg, #F472B6 0%, #FB7185 100%)',
     stars: 5,
@@ -340,7 +351,7 @@ const demoCourses: CourseItem[] = [
     id: 5,
     title: 'UI 设计基础',
     type: 'article',
-    category: '设计',
+    category: '前端开发',
     emoji: '🎨',
     cover: 'linear-gradient(135deg, #C084FC 0%, #F0ABFC 100%)',
     stars: 4,
@@ -351,7 +362,7 @@ const demoCourses: CourseItem[] = [
     id: 6,
     title: 'Python 基础语法',
     type: 'article',
-    category: '后端',
+    category: 'Python编程',
     emoji: '🐍',
     cover: 'linear-gradient(135deg, #34D399 0%, #4ADE80 100%)',
     stars: 5,
@@ -362,7 +373,7 @@ const demoCourses: CourseItem[] = [
     id: 7,
     title: '多端小程序开发',
     type: 'video',
-    category: '移动开发',
+    category: '前端开发',
     emoji: '📱',
     cover: 'linear-gradient(135deg, #38BDF8 0%, #6366F1 100%)',
     stars: 4,
@@ -373,12 +384,34 @@ const demoCourses: CourseItem[] = [
     id: 8,
     title: '产品经理入门',
     type: 'article',
-    category: '产品',
+    category: '求职面试',
     emoji: '🧭',
     cover: 'linear-gradient(135deg, #FB7185 0%, #F59E0B 100%)',
     stars: 4,
     score: '4.4',
     learners: '5.8k'
+  },
+  {
+    id: 9,
+    title: 'Java 从入门到实战',
+    type: 'video',
+    category: 'Java开发',
+    emoji: '☕',
+    cover: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)',
+    stars: 5,
+    score: '4.8',
+    learners: '13.7k'
+  },
+  {
+    id: 10,
+    title: '软件测试基础',
+    type: 'article',
+    category: '软件测试',
+    emoji: '🧪',
+    cover: 'linear-gradient(135deg, #10B981 0%, #34D399 100%)',
+    stars: 4,
+    score: '4.5',
+    learners: '5.1k'
   }
 ]
 
@@ -461,6 +494,10 @@ const demoCourseDetail: CourseDetail = {
 }
 
 // ---------- 内容：接口实现 ----------
+
+function mockCategories(): MockResponse {
+  return body({ data: demoCategories })
+}
 
 function mockBanners(): MockResponse {
   return body({ data: demoBanners })
@@ -805,6 +842,7 @@ export async function mockRequest(options: MockRequestOptions): Promise<MockResp
   if (method === 'GET' && path.endsWith('/getInfo')) return mockGetInfo()
 
   // 内容
+  if (method === 'GET' && path.endsWith('/course/category/list')) return mockCategories()
   if (method === 'GET' && path.endsWith('/content/banners')) return mockBanners()
   if (method === 'GET' && path.endsWith('/content/courses')) return mockCourses(options.data)
   if (method === 'GET' && path.endsWith('/content/search')) return mockSearch(options.data)

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <view class="home">
     <!-- 顶部导航（自定义导航栏，原生导航栏放不下汉堡和铃铛） -->
     <view class="nav" :style="{ paddingTop: statusBarHeight + 'px' }">
@@ -151,8 +151,10 @@ if (menuRect && menuRect.width) {
 
 /* ---------- 分类 ---------- */
 
-const categories = ['推荐', '前端', '后端', '人工智能', '移动开发', '设计', '产品']
-const activeCat = ref(0)
+/** 课程分类，来自后端 GET /course/category/list（不再是写死的假数据） */
+const categories = ref<string[]>([])
+/** -1 表示不筛选、显示全部课程。「推荐」标签已按需求删除，默认就是这个状态 */
+const activeCat = ref(-1)
 
 /* ---------- 数据 ---------- */
 
@@ -164,6 +166,16 @@ const bannerVisible = ref(true)
 
 function closeBanner(): void {
   bannerVisible.value = false
+}
+
+async function loadCategories(): Promise<void> {
+  try {
+    const list = await contentApi.categories()
+    categories.value = list.map((item) => item.categoryName)
+  } catch {
+    // 失败提示由 request 层统一 toast
+    categories.value = []
+  }
 }
 
 async function loadBanners(): Promise<void> {
@@ -178,7 +190,8 @@ async function loadBanners(): Promise<void> {
 async function loadCourses(): Promise<void> {
   loading.value = true
   try {
-    const res = await contentApi.courses({ category: categories[activeCat.value] })
+    const category = activeCat.value >= 0 ? categories.value[activeCat.value] : undefined
+    const res = await contentApi.courses({ category })
     courses.value = res.rows ?? []
   } catch {
     // 失败提示由 request 层统一 toast
@@ -191,8 +204,8 @@ async function loadCourses(): Promise<void> {
 /* ---------- 跳转 ---------- */
 
 function onCategory(index: number): void {
-  if (index === activeCat.value) return
-  activeCat.value = index
+  // 再点一次同一个就取消筛选（「推荐 / 全部」这个标签已经删掉了）
+  activeCat.value = activeCat.value === index ? -1 : index
   void loadCourses()
 }
 
@@ -205,6 +218,7 @@ function goDetail(id: number): void {
 }
 
 onLoad(() => {
+  void loadCategories()
   void loadBanners()
   void loadCourses()
 })
